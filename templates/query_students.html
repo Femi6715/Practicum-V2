@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Query Admitted Students</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f3f6f9;
+      color: #333;
+      animation: fadeInBody 0.6s ease-in-out;
+    }
+  
+    @keyframes fadeInBody {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      width: 250px;
+      background-color: #004080;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      color: white;
+      overflow-y: auto;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .sidebar-nav {
+      padding: 20px 0;
+    }
+
+    .sidebar-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .sidebar-nav li {
+      margin: 0;
+      padding: 0;
+    }
+
+    .sidebar-nav a {
+      display: block;
+      padding: 12px 20px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .sidebar-nav a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: white;
+    }
+
+    .sidebar-nav a.active {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: white;
+      border-left: 4px solid white;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    .main-content {
+      margin-left: 250px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-toggle {
+      display: none;
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 1001;
+      background: none;
+      border: none;
+      color: #004080;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+      }
+
+      .sidebar-toggle {
+        display: block;
+      }
+    }
+  
+    header {
+      background-color: #004080;
+      color: white;
+      padding: 25px 20px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      animation: slideInTop 0.7s ease;
+    }
+  
+    @keyframes slideInTop {
+      0% { transform: translateY(-50px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+  
+    main {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+      animation: zoomIn 0.7s ease;
+    }
+  
+    @keyframes zoomIn {
+      0% { transform: scale(0.96); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  
+    h2 {
+      color: #004080;
+      font-size: 26px;
+      margin-bottom: 20px;
+    }
+  
+    input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.3s ease;
+    }
+  
+    input[type="text"]:focus {
+      border-color: #004080;
+      outline: none;
+    }
+  
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 15px;
+      animation: fadeInTable 0.5s ease-in-out;
+    }
+  
+    @keyframes fadeInTable {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px 14px;
+      text-align: left;
+    }
+  
+    th {
+      background-color: #004080;
+      color: white;
+      font-weight: 600;
+    }
+  
+    tr:hover {
+      background-color: #f1f7ff;
+      transition: background 0.3s ease;
+    }
+  
+    a.download-link, button.detail-btn, a[href^="/student-details"] {
+      color: #004080;
+      text-decoration: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+  
+    a.download-link:hover, button.detail-btn:hover, a[href^="/student-details"]:hover {
+      text-decoration: underline;
+      color: #002f66;
+    }
+  
+    a {
+      display: inline-block;
+      margin-top: 25px;
+      color: #004080;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+  
+    a:hover {
+      color: #002f66;
+      text-decoration: underline;
+    }
+  
+    /* Modal Styling */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 998;
+    }
+  
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      padding: 25px 30px;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      z-index: 999;
+      max-width: 600px;
+      width: 90%;
+      animation: fadeInModal 0.4s ease-in-out;
+    }
+  
+    @keyframes fadeInModal {
+      from { opacity: 0; transform: translate(-50%, -60%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+  
+    .modal h3 {
+      margin-top: 0;
+      color: #004080;
+    }
+  
+    .modal table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+  
+    .modal th, .modal td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+  
+    .modal th {
+      background-color: #f0f0f0;
+      font-weight: 600;
+    }
+  
+    .modal button {
+      margin-top: 20px;
+      background-color: #004080;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+    }
+  
+    .modal button:hover {
+      background-color: #003060;
+    }
+  </style>
+  
+</head>
+<body>
+  <!-- Sidebar Toggle Button -->
+  <button class="sidebar-toggle" onclick="toggleSidebar()">☰</button>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <h2>Student Portal</h2>
+    </div>
+    <nav class="sidebar-nav">
+      <ul>
+        <li><a href="/signin">🏠 Home</a></li>
+        <li><a href="/upload">📤 Upload Documents</a></li>
+        <li><a href="/review">📋 Review Applications</a></li>
+        <li><a href="/query-students" class="active">🔍 Query Students</a></li>
+        <li><a href="/manage-decisions">✅ Manage Decisions</a></li>
+        <li><a href="/generate-reports">📊 Generate Reports</a></li>
+        <li><a href="/help">❓ Help</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">
+      <p>© 2024 Student Portal</p>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <header>
+      <h1>Admitted Students</h1>
+    </header>
+    <main>
+      <h2>Query Admitted Students</h2>
+      <input type="text" id="searchInput" placeholder="Search by name..." />
+      <table id="studentsTable">
+        <thead>
+          <tr>
+            <th>Application ID</th>
+            <th>Full Name</th>
+            <th>Degree</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody id="studentsBody">
+          <!-- Dynamic rows -->
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay"></div>
+  <div class="modal" id="courseModal">
+    <h3 id="modalTitle">Student Courses</h3>
+    <table id="courseTable">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Credit</th>
+          <th>Grade</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <button onclick="closeModal()">Close</button>
+  </div>
+
+  <script>
+    // Set active navigation link
+    function setActiveNavLink() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.sidebar-nav a');
+      navLinks.forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    }
+
+    // Sidebar toggle functionality
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      sidebar.classList.toggle('active');
+    }
+
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', (e) => {
+      const sidebar = document.querySelector('.sidebar');
+      const sidebarToggle = document.querySelector('.sidebar-toggle');
+      if (window.innerWidth <= 768 && 
+          !sidebar.contains(e.target) && 
+          !sidebarToggle.contains(e.target)) {
+        sidebar.classList.remove('active');
+      }
+    });
+
+    // Initialize sidebar
+    document.addEventListener('DOMContentLoaded', () => {
+      setActiveNavLink();
+      let allStudents = []; // Store all students for filtering
+      
+      // Fetch admitted students
+      fetch('/get-admitted-students')
+          .then(response => response.json())
+          .then(data => {
+              allStudents = data; // Store the data
+              displayStudents(allStudents); // Initial display
+          })
+          .catch(err => {
+              console.error("Error loading students:", err);
+              alert("Failed to load students.");
+          });
+      
+      // Add search functionality
+      const searchInput = document.getElementById('searchInput');
+      searchInput.addEventListener('input', (e) => {
+          const searchTerm = e.target.value.toLowerCase();
+          const filteredStudents = allStudents.filter(student => 
+              student.extracted_name.toLowerCase().includes(searchTerm) ||
+              student.extracted_major.toLowerCase().includes(searchTerm) ||
+              student.application_id.toLowerCase().includes(searchTerm)
+          );
+          displayStudents(filteredStudents);
+      });
+    });
+
+    // Function to display students
+    function displayStudents(students) {
+      const tbody = document.getElementById("studentsBody");
+      tbody.innerHTML = "";
+      if (students.length === 0) {
+          tbody.innerHTML = `
+              <tr>
+                  <td colspan="4" style="text-align: center; padding: 20px;">
+                      No students found
+                  </td>
+              </tr>
+          `;
+          return;
+      }
+      students.forEach(student => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+              <td>${student.application_id}</td>
+              <td>${student.extracted_name}</td>
+              <td>${student.extracted_major}</td>
+              <td><a href="/student-details/${student.application_id}">View</a></td>
+          `;
+          tbody.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>

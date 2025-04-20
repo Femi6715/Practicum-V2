@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Documents</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f3f6f9;
+      color: #333;
+      animation: fadeInBody 0.6s ease-in-out;
+      display: flex;
+    }
+  
+    @keyframes fadeInBody {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 250px;
+      background-color: #004080;
+      color: white;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    .nav-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .nav-item {
+      margin: 0;
+      padding: 0;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border-left: 4px solid transparent;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background-color: rgba(255,255,255,0.1);
+      color: white;
+      border-left: 4px solid #ffd700;
+    }
+    
+    .nav-link i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .sidebar-footer {
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 250px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    /* Responsive Sidebar */
+    .sidebar-toggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1001;
+      background-color: #004080;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 0;
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.active {
+        width: 250px;
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .main-content.sidebar-active {
+        margin-left: 250px;
+      }
+    }
+  
+    header {
+      background-color: #004080;
+      color: white;
+      padding: 25px 20px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      animation: slideInTop 0.7s ease;
+    }
+  
+    @keyframes slideInTop {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      background-color: #ffffff;
+      border-top: 1px solid #ddd;
+      color: #666;
+      margin-top: 50px;
+    }
+  
+    .container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+      animation: zoomIn 0.6s ease-in-out;
+    }
+  
+    @keyframes zoomIn {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  
+    h1 {
+      color: #004080;
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+  
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #333;
+    }
+  
+    input[type="file"],
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 15px;
+      transition: border-color 0.3s ease;
+    }
+  
+    input:focus,
+    textarea:focus {
+      border-color: #004080;
+      outline: none;
+    }
+  
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #004080;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+  
+    button:hover {
+      background-color: #003060;
+      transform: translateY(-1px);
+    }
+  
+    .output {
+      margin-top: 25px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      background-color: #eaf3ff;
+      border-radius: 8px;
+      display: none;
+    }
+  
+    .output h3 {
+      margin-top: 0;
+      color: #004080;
+    }
+  
+    .loader-container {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+  
+    .loader {
+      border: 12px solid #f3f3f3;
+      border-top: 12px solid #004080;
+      border-radius: 50%;
+      width: 80px;
+      height: 80px;
+      animation: spin 1.5s linear infinite;
+      margin: auto;
+    }
+  
+    .loader-text {
+      font-size: 18px;
+      color: #004080;
+      margin-top: 10px;
+    }
+  
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  
+    a {
+      display: inline-block;
+      margin-top: 25px;
+      text-align: center;
+      color: #004080;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 500;
+    }
+  
+    a:hover {
+      text-decoration: underline;
+      color: #003060;
+    }
+  
+    .form-group {
+      margin-bottom: 20px;
+    }
+  
+    .file-upload-group {
+      border: 2px dashed #ccc;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      background-color: #f8f9fa;
+    }
+  
+    .file-upload-group:hover {
+      border-color: #004080;
+    }
+  
+    .file-info {
+      font-size: 14px;
+      color: #666;
+      margin-top: 5px;
+    }
+  
+    .results-section {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+    }
+  
+    .results-section h4 {
+      color: #004080;
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Student Portal</h2>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="/upload" class="nav-link">
+          <i>📤</i> Upload Documents
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/review" class="nav-link">
+          <i>📋</i> Review Applications
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/query-students" class="nav-link">
+          <i>🔍</i> Query Students
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/manage-decisions" class="nav-link">
+          <i>✅</i> Manage Decisions
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/generate-reports" class="nav-link">
+          <i>📊</i> Generate Reports
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/help" class="nav-link">
+          <i>❓</i> Help
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/signin" class="nav-link">
+          <i>🚪</i> Sign Out
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>© 2023 Student Portal</p>
+    </div>
+  </div>
+  
+  <!-- Sidebar Toggle Button (visible on mobile) -->
+  <button class="sidebar-toggle" id="sidebarToggle">
+    <span>☰</span>
+  </button>
+  
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <header>
+      <h1>Upload Documents</h1>
+      <p>Submit your transcript and application data for evaluation</p>
+    </header>
+    <div class="container">
+      <h1>Upload Documents</h1>
+      <form id="uploadForm">
+        <!-- <div class="form-group">
+          <label for="applicationId">Application ID:</label>
+          <input type="text" id="applicationId" name="application_id" placeholder="Enter Application ID" required>
+        </div> -->
+
+        <div class="form-group">
+          <div class="file-upload-group">
+            <label for="transcriptUpload">Select Transcript (Image or PDF):</label>
+            <input type="file" id="transcriptUpload" name="transcript" accept=".png, .jpg, .jpeg, .pdf" required>
+            <div class="file-info">Accepted formats: PNG, JPG, JPEG, PDF</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="file-upload-group">
+            <label for="applicationDataUpload">Select Application Data Page (PDF):</label>
+            <input type="file" id="applicationDataUpload" name="application_data" accept=".pdf" required>
+            <div class="file-info">Accepted format: PDF only</div>
+          </div>
+        </div>
+
+        <button type="button" onclick="processDocuments()">Process Documents</button>
+      </form>
+
+      <!-- Loader -->
+      <div id="loaderContainer" class="loader-container">
+        <div class="loader"></div>
+        <div class="loader-text">Processing documents, please wait...</div>
+      </div>
+
+      <!-- Output -->
+      <div class="output" id="output">
+        <h3>Processing Results</h3>
+        
+        <div class="results-section" id="errorSection" style="display: none;">
+          <h4>Error</h4>
+          <p id="errorMessage" style="color: #dc3545; font-weight: 500;"></p>
+        </div>
+
+        <div class="results-section" id="successMessageSection" style="display: none; background-color: #eaf3ff; border: 1px solid #004080; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          <h4 style="color: #004080; margin-top: 0; font-size: 1.2em; margin-bottom: 15px;">Success!</h4>
+          <p style="color: #333; margin-bottom: 15px; font-size: 1.1em;">Your documents have been processed successfully.</p>
+          <p style="color: #333; margin-bottom: 15px;"><strong style="color: #004080;">Application ID:</strong> <span id="successApplicationId" style="font-family: monospace; background-color: #f8f9fa; padding: 4px 8px; border-radius: 4px;"></span></p>
+          <div style="background-color: #f8f9fa; padding: 15px; border-radius: 6px; margin-top: 10px;">
+            <p style="color: #004080; margin-bottom: 10px; font-weight: 500;"><strong>Next Steps:</strong></p>
+            <ol style="color: #333; margin-top: 5px; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Go to the <a href="/query-students" style="color: #004080; text-decoration: none; font-weight: 500; border-bottom: 1px solid #004080;">Query Students</a> page</li>
+              <li style="margin-bottom: 8px;">Search for the student using their name or application ID</li>
+              <li style="margin-bottom: 8px;">Review the student's data and make admission decisions</li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="results-section" id="successSection" style="display: none;">
+          <h4>Transcript Information</h4>
+          <p><strong>Student Name:</strong> <span id="extractedName"></span></p>
+          <p><strong>Major:</strong> <span id="extractedMajor"></span></p>
+          <p><strong>Country:</strong> <span id="extractedCountry"></span></p>
+          <p><strong>Degree Level:</strong> <span id="extractedDegreeLevel"></span></p>
+          <p><strong>Courses Found:</strong> <span id="coursesFound"></span></p>
+          <p><strong>Prerequisite Required:</strong> <span id="prerequisiteResult"></span></p>
+        </div>
+
+        <div class="results-section" id="coursesSection" style="display: none;">
+          <h4>Extracted Courses</h4>
+          <div class="table-responsive">
+            <table class="table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+              <thead style="background-color: #004080; color: white;">
+                <tr>
+                  <th style="padding: 10px; text-align: left;">Course Name</th>
+                  <th style="padding: 10px; text-align: center;">Credits</th>
+                  <th style="padding: 10px; text-align: center;">Grade</th>
+                </tr>
+              </thead>
+              <tbody id="coursesTableBody">
+                <!-- Courses will be inserted here dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="results-section" id="applicationSection" style="display: none;">
+          <h4>Application Information</h4>
+          <p><strong>Student Status:</strong> <span id="studentStatusResult"></span></p>
+          <p><strong>Field of Study:</strong> <span id="fieldOfStudyResult"></span></p>
+          <p><strong>Program Format:</strong> <span id="programFormatResult"></span></p>
+          <p><strong>Start Term:</strong> <span id="startTermResult"></span></p>
+          <p><strong>Address:</strong> <span id="addressResult"></span></p>
+          <p><strong>City:</strong> <span id="cityResult"></span></p>
+          <p><strong>State:</strong> <span id="stateResult"></span></p>
+          <p><strong>Country:</strong> <span id="countryResult"></span></p>
+          <p><strong>Zip Code:</strong> <span id="zipCodeResult"></span></p>
+          <p><strong>Military Service:</strong> <span id="militaryServiceResult"></span></p>
+          <p><strong>Citizenship Type:</strong> <span id="citizenTypeResult"></span></p>
+        </div>
+      </div>
+
+      <a href="/signin">Back to Home</a>
+    </div>
+  </div>
+
+  <script>
+    // Set active navigation link based on current page
+    function setActiveNavLink() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.nav-link');
+      
+      navLinks.forEach(link => {
+        if (currentPath.includes(link.getAttribute('href'))) {
+          link.classList.add('active');
+        }
+      });
+    }
+    
+    // Initialize sidebar toggle functionality
+    function initSidebarToggle() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      
+      sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+        mainContent.classList.toggle('sidebar-active');
+      });
+      
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', function(event) {
+        const isClickInside = sidebar.contains(event.target) || 
+                             sidebarToggle.contains(event.target);
+        
+        if (!isClickInside && window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+          sidebar.classList.remove('active');
+          mainContent.classList.remove('sidebar-active');
+        }
+      });
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove('active');
+          mainContent.classList.remove('sidebar-active');
+        }
+      });
+    }
+
+    function processDocuments() {
+      const transcriptFile = document.getElementById("transcriptUpload").files[0];
+      const applicationDataFile = document.getElementById("applicationDataUpload").files[0];
+      
+      if (!transcriptFile || !applicationDataFile) {
+        showError("Please select both transcript and application data files.");
+        return;
+      }
+
+      // Validate application data file is PDF
+      if (applicationDataFile.type !== "application/pdf") {
+        showError("Application data must be a PDF file.");
+        return;
+      }
+
+      const loaderContainer = document.getElementById("loaderContainer");
+      loaderContainer.style.display = "block";
+      document.getElementById("output").style.display = "none";
+      document.getElementById("errorSection").style.display = "none";
+      document.getElementById("successMessageSection").style.display = "none";
+      document.getElementById("successSection").style.display = "none";
+      document.getElementById("coursesSection").style.display = "none";
+      document.getElementById("applicationSection").style.display = "none";
+
+      const formData = new FormData();
+      formData.append("transcript", transcriptFile);
+      formData.append("application_data", applicationDataFile);
+
+      fetch("/upload", {
+        method: "POST",
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Backend response:", data);
+
+        setTimeout(() => {
+          loaderContainer.style.display = "none";
+          document.getElementById("output").style.display = "block";
+
+          if (data.error) {
+            showError(data.error);
+            return;
+          }
+
+          // Show success message with application ID
+          document.getElementById("successMessageSection").style.display = "block";
+          document.getElementById("successApplicationId").innerText = data.application_id;
+
+          // Display transcript information
+          document.getElementById("successSection").style.display = "block";
+          document.getElementById("extractedName").innerText = data.student_info?.extracted_name || 'Not found';
+          document.getElementById("extractedMajor").innerText = data.student_info?.extracted_major || 'Not found';
+          document.getElementById("extractedCountry").innerText = data.student_info?.extracted_country || 'Not found';
+          document.getElementById("extractedDegreeLevel").innerText = data.student_info?.extracted_degree_level || 'Not found';
+          document.getElementById("coursesFound").innerText = data.courses_found || '0';
+          document.getElementById("prerequisiteResult").innerText = data.prerequisite_required ? 'Yes' : 'No';
+
+          // Display courses if available
+          if (data.application_id) {
+            console.log("Fetching courses for application ID:", data.application_id);
+            fetch(`/get-courses/${data.application_id}`)
+              .then(response => {
+                console.log("Course fetch response status:", response.status);
+                if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+              })
+              .then(courses => {
+                console.log("Received courses:", courses);
+                const coursesTableBody = document.getElementById("coursesTableBody");
+                coursesTableBody.innerHTML = ''; // Clear existing content
+
+                if (courses && courses.length > 0) {
+                  courses.forEach(course => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                      <td style="padding: 8px; border-bottom: 1px solid #ddd;">${course.course_name || 'N/A'}</td>
+                      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${course.credits || '0'}</td>
+                      <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">${course.grade || 'N/A'}</td>
+                    `;
+                    coursesTableBody.appendChild(row);
+                  });
+                  document.getElementById("coursesSection").style.display = "block";
+                } else {
+                  console.log("No courses found or empty response");
+                  coursesTableBody.innerHTML = `
+                    <tr>
+                      <td colspan="3" style="text-align: center; padding: 15px;">
+                        No courses found for this application
+                      </td>
+                    </tr>
+                  `;
+                  document.getElementById("coursesSection").style.display = "block";
+                }
+              })
+              .catch(error => {
+                console.error("Error fetching courses:", error);
+                const coursesTableBody = document.getElementById("coursesTableBody");
+                coursesTableBody.innerHTML = `
+                  <tr>
+                    <td colspan="3" style="text-align: center; padding: 15px; color: red;">
+                      Error loading courses: ${error.message}
+                    </td>
+                  </tr>
+                `;
+                document.getElementById("coursesSection").style.display = "block";
+              });
+          } else {
+            console.error("No application_id in response:", data);
+          }
+
+          // Display application information
+          document.getElementById("applicationSection").style.display = "block";
+          document.getElementById("studentStatusResult").innerText = data.student_info?.student_status || 'Not found';
+          document.getElementById("fieldOfStudyResult").innerText = data.student_info?.field_of_study || 'Not found';
+          document.getElementById("programFormatResult").innerText = data.student_info?.program_format || 'Not found';
+          document.getElementById("startTermResult").innerText = data.student_info?.start_semester || 'Not found';
+          document.getElementById("addressResult").innerText = data.student_info?.address || 'Not found';
+          document.getElementById("cityResult").innerText = data.student_info?.city || 'Not found';
+          document.getElementById("stateResult").innerText = data.student_info?.state || 'Not found';
+          document.getElementById("countryResult").innerText = data.student_info?.country || 'Not found';
+          document.getElementById("zipCodeResult").innerText = data.student_info?.zip_code || 'Not found';
+          document.getElementById("militaryServiceResult").innerText = data.student_info?.military_service ? 'Yes' : 'No';
+          document.getElementById("citizenTypeResult").innerText = data.student_info?.citizen_type || 'Not found';
+        }, 2000);
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        loaderContainer.style.display = "none";
+        showError("An error occurred while processing the documents.");
+      });
+    }
+
+    function showError(message) {
+      document.getElementById("output").style.display = "block";
+      document.getElementById("errorSection").style.display = "block";
+      document.getElementById("errorMessage").innerText = message;
+      document.getElementById("successMessageSection").style.display = "none";
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set active nav link
+      setActiveNavLink();
+      
+      // Initialize sidebar toggle
+      initSidebarToggle();
+    });
+  </script>
+</body>
+</html>

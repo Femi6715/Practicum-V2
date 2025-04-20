@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Reports</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f3f6f9;
+      color: #333;
+      animation: fadeInBody 0.6s ease-in-out;
+      display: flex;
+    }
+  
+    @keyframes fadeInBody {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  
+    /* Sidebar Navigation */
+    .sidebar {
+      width: 250px;
+      background-color: #004080;
+      color: white;
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      overflow-y: auto;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+    
+    .sidebar-header {
+      padding: 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .sidebar-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    .nav-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .nav-item {
+      margin: 0;
+      padding: 0;
+    }
+    
+    .nav-link {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border-left: 4px solid transparent;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background-color: rgba(255,255,255,0.1);
+      color: white;
+      border-left: 4px solid #ffd700;
+    }
+    
+    .nav-link i {
+      margin-right: 10px;
+      width: 20px;
+      text-align: center;
+    }
+    
+    .sidebar-footer {
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.6);
+    }
+    
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      margin-left: 250px;
+      padding: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    /* Responsive Sidebar */
+    .sidebar-toggle {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 1001;
+      background-color: #004080;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 0;
+        transform: translateX(-100%);
+      }
+      
+      .sidebar.active {
+        width: 250px;
+        transform: translateX(0);
+      }
+      
+      .main-content {
+        margin-left: 0;
+      }
+      
+      .main-content.sidebar-active {
+        margin-left: 250px;
+      }
+    }
+  
+    header {
+      background-color: #004080;
+      color: white;
+      padding: 25px 20px;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      animation: slideInTop 0.7s ease;
+    }
+  
+    @keyframes slideInTop {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+      background-color: #ffffff;
+      border-top: 1px solid #ddd;
+      color: #666;
+      margin-top: 50px;
+    }
+  
+    .container {
+      max-width: 800px;
+      margin: 40px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+      animation: zoomIn 0.6s ease-in-out;
+    }
+  
+    @keyframes zoomIn {
+      from { transform: scale(0.96); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  
+    h1 {
+      color: #004080;
+      text-align: center;
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+  
+    .report-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 30px;
+    }
+  
+    .report-card {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+  
+    .report-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+  
+    .report-card i {
+      font-size: 2.5rem;
+      color: #004080;
+      margin-bottom: 15px;
+    }
+  
+    .report-card h3 {
+      color: #333;
+      margin: 10px 0;
+    }
+  
+    .report-card p {
+      color: #666;
+      font-size: 14px;
+      margin: 0;
+    }
+  
+    .report-filters {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+  
+    .filter-group {
+      margin-bottom: 20px;
+    }
+  
+    .filter-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+    }
+  
+    .filter-group select,
+    .filter-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+  
+    .generate-btn {
+      background-color: #004080;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+    }
+  
+    .generate-btn:hover {
+      background-color: #003060;
+    }
+  
+    .report-preview {
+      margin-top: 30px;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      display: none;
+    }
+  
+    .report-preview h3 {
+      color: #004080;
+      margin-top: 0;
+    }
+  
+    .preview-content {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 4px;
+    }
+  
+    .download-options {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+  
+    .download-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+    }
+  
+    .download-pdf {
+      background-color: #dc3545;
+      color: white;
+    }
+  
+    .download-excel {
+      background-color: #28a745;
+      color: white;
+    }
+  
+    .download-btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar Navigation -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h2>Student Portal</h2>
+    </div>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="/upload" class="nav-link">
+          <i>📤</i> Upload Documents
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/review" class="nav-link">
+          <i>📋</i> Review Applications
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/query-students" class="nav-link">
+          <i>🔍</i> Query Students
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/manage-decisions" class="nav-link">
+          <i>✅</i> Manage Decisions
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/generate-reports" class="nav-link">
+          <i>📊</i> Generate Reports
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/help" class="nav-link">
+          <i>❓</i> Help
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="/signin" class="nav-link">
+          <i>🚪</i> Sign Out
+        </a>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>© 2023 Student Portal</p>
+    </div>
+  </div>
+  
+  <!-- Sidebar Toggle Button (visible on mobile) -->
+  <button class="sidebar-toggle" id="sidebarToggle">
+    <span>☰</span>
+  </button>
+  
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+    <header>
+      <h1>Generate Reports</h1>
+      <p>Create and download various reports for analysis</p>
+    </header>
+    
+    <div class="container">
+      <h1>Generate Reports</h1>
+      
+      <div class="report-options">
+        <div class="report-card" onclick="selectReport('applications')">
+          <i>📝</i>
+          <h3>Applications Report</h3>
+          <p>Overview of all student applications</p>
+        </div>
+        
+        <div class="report-card" onclick="selectReport('prerequisites')">
+          <i>📚</i>
+          <h3>Prerequisites Report</h3>
+          <p>Analysis of prerequisite requirements</p>
+        </div>
+        
+        <div class="report-card" onclick="selectReport('decisions')">
+          <i>✅</i>
+          <h3>Decisions Report</h3>
+          <p>Summary of application decisions</p>
+        </div>
+        
+        <div class="report-card" onclick="selectReport('demographics')">
+          <i>👥</i>
+          <h3>Demographics Report</h3>
+          <p>Student demographic analysis</p>
+        </div>
+      </div>
+      
+      <div class="report-filters">
+        <div class="filter-group">
+          <label for="dateRange">Date Range:</label>
+          <select id="dateRange">
+            <option value="last7">Last 7 Days</option>
+            <option value="last30">Last 30 Days</option>
+            <option value="last90">Last 90 Days</option>
+            <option value="custom">Custom Range</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="program">Program:</label>
+          <select id="program">
+            <option value="all">All Programs</option>
+            <option value="is">Information Systems</option>
+            <option value="cs">Computer Science</option>
+            <option value="se">Software Engineering</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label for="status">Status:</label>
+          <select id="status">
+            <option value="all">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        
+        <button class="generate-btn" onclick="generateReport()">Generate Report</button>
+      </div>
+      
+      <div class="report-preview" id="reportPreview">
+        <h3>Report Preview</h3>
+        <div class="preview-content" id="previewContent">
+          <!-- Report content will be dynamically inserted here -->
+        </div>
+        
+        <div class="download-options">
+          <button class="download-btn download-pdf" onclick="downloadReport('pdf')">Download PDF</button>
+          <button class="download-btn download-excel" onclick="downloadReport('excel')">Download Excel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Set active navigation link based on current page
+    function setActiveNavLink() {
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('.nav-link');
+      
+      navLinks.forEach(link => {
+        if (currentPath.includes(link.getAttribute('href'))) {
+          link.classList.add('active');
+        }
+      });
+    }
+    
+    // Initialize sidebar toggle functionality
+    function initSidebarToggle() {
+      const sidebar = document.getElementById('sidebar');
+      const mainContent = document.getElementById('mainContent');
+      const sidebarToggle = document.getElementById('sidebarToggle');
+      
+      sidebarToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('active');
+        mainContent.classList.toggle('sidebar-active');
+      });
+      
+      // Close sidebar when clicking outside on mobile
+      document.addEventListener('click', function(event) {
+        const isClickInside = sidebar.contains(event.target) || 
+                             sidebarToggle.contains(event.target);
+        
+        if (!isClickInside && window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+          sidebar.classList.remove('active');
+          mainContent.classList.remove('sidebar-active');
+        }
+      });
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove('active');
+          mainContent.classList.remove('sidebar-active');
+        }
+      });
+    }
+
+    let selectedReport = null;
+
+    function selectReport(reportType) {
+      selectedReport = reportType;
+      // Highlight the selected card
+      document.querySelectorAll('.report-card').forEach(card => {
+        card.style.backgroundColor = '#f8f9fa';
+      });
+      event.currentTarget.style.backgroundColor = '#e3e8ef';
+    }
+
+    function generateReport() {
+      if (!selectedReport) {
+        alert('Please select a report type first.');
+        return;
+      }
+
+      const dateRange = document.getElementById('dateRange').value;
+      const program = document.getElementById('program').value;
+      const status = document.getElementById('status').value;
+
+      // Show loading state
+      const previewContent = document.getElementById('previewContent');
+      previewContent.innerHTML = '<p>Generating report...</p>';
+      document.getElementById('reportPreview').style.display = 'block';
+
+      // Make API call to generate report
+      fetch('/generate-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reportType: selectedReport,
+          format: 'pdf',  // Default to PDF
+          dateRange: dateRange,
+          program: program,
+          status: status
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => {
+            throw new Error(err.error || 'Failed to generate report');
+          });
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${selectedReport}_report.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        // Update preview content
+        previewContent.innerHTML = `
+          <div class="success-message">
+            <p>Report generated successfully!</p>
+            <p>The download should start automatically. If it doesn't, 
+               <a href="#" onclick="downloadLastReport('${selectedReport}', '${dateRange}')">click here</a>.</p>
+          </div>
+        `;
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        previewContent.innerHTML = `
+          <div class="error-message">
+            <p>Error generating report: ${error.message}</p>
+            <p>Please try again or contact support if the problem persists.</p>
+          </div>
+        `;
+      });
+    }
+
+    function downloadReport(format) {
+      if (!selectedReport) {
+        alert('Please select a report type first.');
+        return;
+      }
+
+      const dateRange = document.getElementById('dateRange').value;
+      const program = document.getElementById('program').value;
+      const status = document.getElementById('status').value;
+
+      fetch('/generate-report', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reportType: selectedReport,
+          format: format,
+          dateRange: dateRange,
+          program: program,
+          status: status
+        })
+      })
+      .then(response => {
+        if (!response.ok) {
+          return response.json().then(err => {
+            throw new Error(err.error || 'Failed to generate report');
+          });
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${selectedReport}_report.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert(`Error generating report: ${error.message}`);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set active nav link
+      setActiveNavLink();
+      
+      // Initialize sidebar toggle
+      initSidebarToggle();
+    });
+  </script>
+</body>
+</html> 

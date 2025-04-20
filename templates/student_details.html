@@ -1,0 +1,1345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Details</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f6f9;
+            color: #333;
+            animation: fadeInBody 1s ease-in-out;
+            display: flex;
+        }
+    
+        @keyframes fadeInBody {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 250px;
+            background-color: #004080;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-item {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Responsive Sidebar */
+        .sidebar-toggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+            background-color: #004080;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                width: 250px;
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .main-content.sidebar-active {
+                margin-left: 250px;
+            }
+        }
+    
+        header {
+            background-color: #004080;
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            animation: slideInTop 1s ease-in-out;
+        }
+    
+        @keyframes slideInTop {
+            0% { transform: translateY(-50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+    
+        main {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+            animation: zoomIn 0.8s ease-in-out;
+        }
+    
+        @keyframes zoomIn {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    
+        h2, h3 {
+            color: #004080;
+            margin-bottom: 15px;
+        }
+    
+        h2 {
+            font-size: 26px;
+        }
+    
+        h3 {
+            font-size: 22px;
+            margin-top: 35px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 8px;
+        }
+    
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 15px;
+            animation: fadeInTable 1s ease-in-out;
+        }
+    
+        @keyframes fadeInTable {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    
+        th, td {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+    
+        th {
+            background-color: #004080;
+            color: white;
+            font-weight: 600;
+        }
+    
+        td {
+            background-color: #fefefe;
+        }
+    
+        button, .pdf-button {
+            padding: 8px 14px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+    
+        button {
+            background-color: transparent;
+            color: #004080;
+        }
+    
+        button:hover {
+            text-decoration: underline;
+            transform: scale(1.05);
+        }
+    
+        button.action-button, .pdf-button {
+            background-color: #004080;
+            color: white;
+            font-weight: 500;
+        }
+    
+        button.action-button:hover, .pdf-button:hover {
+            background-color: #003060;
+            transform: scale(1.05);
+        }
+    
+        button.action-button:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+    
+        .section-divider {
+            border-top: 2px dashed #ccc;
+            margin: 40px 0;
+        }
+    
+        .student-info {
+            background-color: #eaf3ff;
+            padding: 20px;
+            border-left: 5px solid #004080;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            animation: fadeInStudentInfo 1s ease-in-out;
+        }
+    
+        @keyframes fadeInStudentInfo {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    
+        .prerequisite-section {
+            margin-top: 50px;
+            background-color: #f0f4f8;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            animation: fadeInPrereq 1s ease-in-out;
+        }
+    
+        @keyframes fadeInPrereq {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    
+        .prerequisite-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 15px;
+        }
+    
+        .prerequisite-item {
+            background-color: #dfe8f2;
+            padding: 10px 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #004080;
+            border: 1px solid #aac5e2;
+            animation: fadeInItem 0.4s ease-in-out;
+        }
+    
+        @keyframes fadeInItem {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    
+        .prerequisite-item button {
+            margin-left: 8px;
+            color: #cc0000;
+            font-weight: bold;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+    
+        .prerequisite-item button:hover {
+            transform: scale(1.2);
+        }
+    
+        .add-prerequisite {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            align-items: center;
+        }
+    
+        select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+    
+        a {
+            color: #004080;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+    
+        a:hover {
+            text-decoration: underline;
+            color: #002f66;
+        }
+        
+        /* Demographic Section Styles */
+        .demographic-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .demographic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .demographic-item {
+            background-color: white;
+            padding: 12px 15px;
+            border-radius: 6px;
+            border-left: 4px solid #004080;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .demographic-item .label {
+            font-weight: 600;
+            color: #555;
+            margin-right: 8px;
+        }
+        
+        .demographic-item span {
+            display: inline-block;
+        }
+
+        .prerequisite-recommendation {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 5px solid #004080;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .recommendation-status {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+        }
+
+        .status-indicator .label {
+            font-weight: 600;
+            color: #333;
+            min-width: 180px;
+        }
+
+        .status {
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .status.yes {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+
+        .status.no {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .recommendation-details {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .recommendation-details h4 {
+            color: #333;
+            margin: 0 0 10px 0;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .recommendation-explanation {
+            margin-bottom: 20px;
+        }
+
+        .recommendation-explanation p {
+            margin: 5px 0;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .recommended-courses {
+            margin-top: 20px;
+        }
+
+        .recommended-course {
+            background-color: #f8f9fa;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .recommended-course:hover {
+            background-color: #eaf3ff;
+            transform: translateX(5px);
+        }
+
+        .recommended-course:before {
+            content: "•";
+            color: #004080;
+            font-size: 1.5em;
+        }
+
+        .no-prerequisites {
+            color: #2e7d32;
+            font-weight: 500;
+            padding: 10px;
+            background-color: #e8f5e9;
+            border-radius: 4px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+    
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Student Portal</h2>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="/upload" class="nav-link">
+                    <i>📤</i> Upload Documents
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/review" class="nav-link">
+                    <i>📋</i> Review Applications
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/query-students" class="nav-link">
+                    <i>🔍</i> Query Students
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/manage-decisions" class="nav-link">
+                    <i>✅</i> Manage Decisions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/generate-reports" class="nav-link">
+                    <i>📊</i> Generate Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/help" class="nav-link">
+                    <i>❓</i> Help
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/signin" class="nav-link">
+                    <i>🚪</i> Sign Out
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <p>© 2023 Student Portal</p>
+        </div>
+    </div>
+    
+    <!-- Sidebar Toggle Button (visible on mobile) -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <span>☰</span>
+    </button>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+    <header>
+        <h1>Student Details</h1>
+    </header>
+    <main>
+        <div class="student-info">
+                <h2 id="studentName">Loading student information...</h2>
+                <p id="studentDetails">Application ID: </p>
+            </div>
+            
+            <!-- Demographic Information Section -->
+            <div class="demographic-section">
+                <h3>Demographic Information</h3>
+                <div class="demographic-grid">
+                    <div class="demographic-item">
+                        <span class="label">Student Status:</span>
+                        <span id="citizenship">Loading...</span>
+                    </div>
+                    <div class="demographic-item">
+                        <span class="label">Email:</span>
+                        <span id="email">Loading...</span>
+                    </div>
+                    <div class="demographic-item">
+                        <span class="label">Field of Study:</span>
+                        <span id="fieldOfStudy">Loading...</span>
+                    </div>
+                    <div class="demographic-item">
+                        <span class="label">Program Format:</span>
+                        <span id="programFormat">Loading...</span>
+                    </div>
+                    <div class="demographic-item">
+                        <span class="label">Start Term:</span>
+                        <span id="startTerm">Loading...</span>
+                    </div>
+                </div>
+        </div>
+        
+        <!-- Current Courses Table -->
+        <h3>Transcript Courses</h3>
+        <table id="coursesTable">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" onclick="selectAllCourses()"></th>
+                    <th>Course</th>
+                    <th>Credits</th>
+                    <th>Grade</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Course details will be dynamically inserted here -->
+            </tbody>
+        </table>
+        
+            <!-- Prerequisite Recommendation Section -->
+            <div class="prerequisite-recommendation">
+                <h3>Prerequisite Evaluation</h3>
+                <div class="recommendation-status">
+                    <div class="status-indicator">
+                        <span class="label">Prerequisites Required:</span>
+                        <span id="prerequisiteRequired" class="status">Loading...</span>
+                    </div>
+                </div>
+                <div id="recommendationDetails" class="recommendation-details">
+                    <div class="recommendation-explanation">
+                        <h4>Evaluation Result:</h4>
+                        <p id="prereqExplanation">Analyzing transcript...</p>
+                    </div>
+                    <div id="recommendedCourses" class="recommended-courses">
+                        <h4>Required Prerequisite Courses:</h4>
+                        <!-- Recommended courses will be listed here -->
+                    </div>
+                </div>
+            </div>
+        
+        <!-- Prerequisite Courses Section -->
+        <div class="prerequisite-section">
+            <h3>Assign Prerequisite Courses</h3>
+            <p>Assign up to 4 prerequisite courses for this student.</p>
+            
+            <!-- Display assigned prerequisites -->
+            <div class="prerequisite-list" id="assignedPrerequisites">
+                <!-- Assigned prerequisites will be displayed here -->
+            </div>
+            
+            <!-- Add new prerequisite -->
+            <div class="add-prerequisite">
+                <select id="prerequisiteCourseSelect">
+                    <option value="">Select a prerequisite course</option>
+                    <!-- Available courses will be loaded here -->
+                </select>
+                <select id="termSelect">
+                    <option value="">Select term</option>
+                    <option value="Fall">Fall</option>
+                    <option value="Spring">Spring</option>
+                    <option value="Summer">Summer</option>
+                </select>
+                <button class="action-button" onclick="addPrerequisite()">Add Prerequisite</button>
+            </div>
+
+            
+            <button class="action-button" onclick="savePrerequisites()" style="margin-top: 20px;">Save Prerequisites</button>
+        </div>
+        <!-- Prerequisites Table -->
+        <div class="section-divider"></div>
+        <h3>Assigned Prerequisites</h3>
+        <table id="prerequisitesTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Prerequisite Course</th>
+                    <th>Term</th>
+                    <th>Status</th>
+                        <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Prerequisite courses will be dynamically inserted here -->
+                <tr>
+                        <td colspan="5" class="text-center">No prerequisites assigned yet</td>
+                </tr>
+            </tbody>
+        </table>
+        
+    <!-- Add PDF buttons -->
+    <div class="pdf-buttons">
+        <button class="pdf-button" onclick="printPrerequisites()">Print Prerequisites</button>
+        <!-- <button class="pdf-button" onclick="downloadPrerequisitesPDF()">Download as PDF</button> -->
+    </div>
+        
+    
+        
+        <a href="/query-students" style="display: block; margin-top: 20px;">Back to list</a>
+    </main>
+    </div>
+    
+    <script>
+        // Global variables
+        let applicationId;
+        let studentName = "Unknown Student";
+        let assignedPrerequisites = [];
+        const MAX_PREREQUISITES = 4;
+        
+        // Available prerequisite courses
+        const availablePrerequisites = [
+            { id: 1, name: "INSS 500 Introduction to Information Systems" },
+            { id: 2, name: "INSS 505 Object Oriented Programming" },
+            { id: 3, name: "INSS 515 Principles & Practices of Information Systems" },
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            applicationId = new URL(window.location.href).pathname.split('/').pop();
+            document.getElementById('studentName').innerText = 'Loading...';
+            document.getElementById('studentDetails').innerText = `Application ID: ${applicationId}`;
+            
+            // Load student information
+            fetchStudentInfo(applicationId);
+            
+            // Load current courses
+            fetchCourses(applicationId);
+            
+            // Load prerequisite courses
+            loadPrerequisiteCourses();
+            
+            // Load assigned prerequisites
+            fetchAssignedPrerequisites(applicationId);
+
+            // Add this line to load prerequisite recommendations
+            updatePrerequisiteRecommendation(applicationId);
+            
+            // Set active nav link
+            setActiveNavLink();
+            
+            // Initialize sidebar toggle
+            initSidebarToggle();
+        });
+        
+        // Set active navigation link based on current page
+        function setActiveNavLink() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (currentPath.includes(link.getAttribute('href'))) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // Initialize sidebar toggle functionality
+        function initSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                mainContent.classList.toggle('sidebar-active');
+            });
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                const isClickInside = sidebar.contains(event.target) || 
+                                     sidebarToggle.contains(event.target);
+                
+                if (!isClickInside && window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('sidebar-active');
+                }
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('sidebar-active');
+                }
+            });
+        }
+
+        function fetchStudentInfo(applicationId) {
+            // Show loading state
+            document.getElementById('studentName').innerText = 'Loading...';
+            document.getElementById('studentDetails').innerText = `Application ID: ${applicationId}`;
+            
+            // Fetch student details from the server
+            fetch(`/get-student-info/${applicationId}`)
+                .then(res => {
+                    if (!res.ok) {
+                        if (res.status === 404) {
+                            return { extracted_name: "Unknown Student", extracted_major: "Unknown" };
+                        }
+                        throw new Error('Failed to fetch student info');
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    // Use extracted_name and extracted_major from the student data
+                    studentName = data.extracted_name || "Unknown Student";
+                    const major = data.extracted_major || "Unknown Major";
+                    
+                    // Display the name at the top
+                    document.getElementById('studentName').innerText = `Student: ${studentName}`;
+                    document.getElementById('studentDetails').innerText = `Application ID: ${applicationId} | Major: ${major}`;
+                    
+                    // Update demographic information
+                    document.getElementById('citizenship').innerText = data.citizenship || "International";
+                    document.getElementById('email').innerText = data.email || "Unknown";
+                    document.getElementById('fieldOfStudy').innerText = data.fieldOfStudy || "Unknown";
+                    document.getElementById('programFormat').innerText = data.programFormat || "Unknown";
+                    
+                    // Format start term
+                    const startTerm = data.startSemester && data.startYear ? 
+                        `${data.startSemester} ${data.startYear}` : "Unknown";
+                    document.getElementById('startTerm').innerText = startTerm;
+                })
+                .catch(err => {
+                    console.error("Error fetching student info:", err);
+                    document.getElementById('studentName').innerText = `Student: Unknown Student`;
+                    document.getElementById('studentDetails').innerText = `Application ID: ${applicationId}`;
+                    
+                    // Set default values for demographic information
+                    document.getElementById('citizenship').innerText = "International";
+                    document.getElementById('email').innerText = "Unknown";
+                    document.getElementById('fieldOfStudy').innerText = "Unknown";
+                    document.getElementById('programFormat').innerText = "Unknown";
+                    document.getElementById('startTerm').innerText = "Unknown";
+                });
+        }
+
+        function fetchCourses(applicationId) {
+            console.log('Fetching courses for application ID:', applicationId);
+            const tbody = document.getElementById('coursesTable').querySelector('tbody');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Loading courses...</td></tr>';
+
+            fetch(`/get-courses/${applicationId}`)
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(courses => {
+                    console.log('Received courses:', courses);
+                    tbody.innerHTML = ''; // Clear existing entries
+                    
+                    if (!Array.isArray(courses) || courses.length === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 20px;">
+                                    No courses found for this student
+                                </td>
+                            </tr>`;
+                        return;
+                    }
+                    
+                    courses.forEach(course => {
+                        const row = tbody.insertRow();
+                        row.setAttribute('data-id', course.course_id);
+                        
+                        // Create cells
+                        const checkboxCell = row.insertCell();
+                        const courseNameCell = row.insertCell();
+                        const creditsCell = row.insertCell();
+                        const gradeCell = row.insertCell();
+                        const actionsCell = row.insertCell();
+                        
+                        // Add content to cells
+                        checkboxCell.innerHTML = `<input type="checkbox" class="selectCourse" data-id="${course.course_id}">`;
+                        courseNameCell.textContent = course.course_name || 'N/A';
+                        courseNameCell.className = 'editable';
+                        creditsCell.textContent = course.credits || 'N/A';
+                        creditsCell.className = 'editable';
+                        gradeCell.textContent = course.grade || 'N/A';
+                        gradeCell.className = 'editable';
+                        
+                        // Add action buttons
+                        actionsCell.innerHTML = `
+                            <button onclick="toggleEdit(${course.course_id}, true)" class="action-button">
+                                Edit
+                            </button>
+                            <button onclick="deleteCourse(${course.course_id})" class="action-button" style="margin-left: 5px;">
+                                Delete
+                            </button>
+                        `;
+                    });
+                })
+                .catch(err => {
+                    console.error("Error fetching courses:", err);
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: red; padding: 20px;">
+                                Error loading courses: ${err.message}
+                            </td>
+                        </tr>`;
+                });
+        }
+
+        function toggleEdit(courseId, isEditing) {
+            const row = document.querySelector(`tr[data-id="${courseId}"]`);
+            const editButton = row.querySelector('button:first-child');
+            const cells = row.querySelectorAll('td.editable');
+            
+            if (isEditing) {
+                // Switch to edit mode
+                cells.forEach(cell => {
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = cell.innerText;
+                    cell.innerHTML = '';
+                    cell.appendChild(input);
+                });
+                editButton.textContent = 'Save';
+                editButton.onclick = () => toggleEdit(courseId, false); // Call the same function with isEditing=false
+            } else {
+                // Save the changes
+                const values = Array.from(cells).map(cell => cell.querySelector('input').value);
+                fetch(`/update-course/${courseId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ courseName: values[0], credits: values[1], grade: values[2] })
+                }).then(res => {
+                    if (!res.ok) throw new Error('Failed to update');
+                    cells.forEach((cell, index) => {
+                        cell.innerText = values[index];
+                    });
+                    editButton.textContent = 'Edit';
+                    editButton.onclick = () => toggleEdit(courseId, true);
+                }).catch(err => {
+                    console.error('Error updating course:', err);
+                    alert('Error updating course.');
+                });
+            }
+        }
+
+        function deleteCourse(courseId) {
+            if (confirm('Are you sure you want to delete this course?')) {
+                fetch(`/delete-course/${courseId}`, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Deletion failed');
+                    alert('Course deleted successfully');
+                    fetchCourses(applicationId);
+                })
+                .catch(err => {
+                    console.error('Error deleting course:', err);
+                    alert('Error deleting course.');
+                });
+            }
+        }
+
+        function selectAllCourses() {
+            const selectAllCheckbox = document.getElementById('selectAll');
+            const allCheckboxes = document.querySelectorAll('.selectCourse');
+            allCheckboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+
+        function deleteSelected() {
+            const selectedCourses = document.querySelectorAll('.selectCourse:checked');
+            const ids = Array.from(selectedCourses, checkbox => checkbox.getAttribute('data-id'));
+            
+            if (ids.length === 0) {
+                alert('Please select at least one course to delete.');
+                return;
+            }
+            
+            if (confirm(`Are you sure you want to delete ${ids.length} selected course(s)?`)) {
+                fetch('/delete-courses', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids })
+                }).then(response => {
+                    if (!response.ok) throw new Error('Batch deletion failed');
+                    alert('Selected courses deleted successfully');
+                    fetchCourses(applicationId);
+                }).catch(err => {
+                    console.error('Error deleting selected courses:', err);
+                    alert('Error deleting selected courses.');
+                });
+            }
+        }
+        
+        // Prerequisite functions
+        function loadPrerequisiteCourses() {
+            const select = document.getElementById('prerequisiteCourseSelect');
+            
+            // Clear existing options except the first one
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            // Add available prerequisites
+            availablePrerequisites.forEach(course => {
+                // Skip if already assigned
+                if (assignedPrerequisites.some(p => p.id === course.id)) {
+                    return;
+                }
+                
+                const option = document.createElement('option');
+                option.value = course.id;
+                option.textContent = course.name;
+                select.appendChild(option);
+            });
+        }
+        
+        function fetchAssignedPrerequisites(applicationId) {
+    fetch(`/get-prerequisites/${applicationId}`)
+        .then(res => {
+            if (!res.ok) {
+                if (res.status === 404) {
+                    return { prerequisites: [] };
+                }
+                throw new Error('Failed to fetch prerequisites');
+            }
+            return res.json();
+        })
+        .then(data => {
+            assignedPrerequisites = data.prerequisites || [];
+            renderAssignedPrerequisites();
+            updatePrerequisitesTable();
+        })
+        .catch(err => {
+            console.error("Error fetching prerequisites:", err);
+            assignedPrerequisites = [];
+            renderAssignedPrerequisites();
+            updatePrerequisitesTable();
+        });
+}
+        
+        function renderAssignedPrerequisites() {
+            const container = document.getElementById('assignedPrerequisites');
+            container.innerHTML = '';
+            
+            if (assignedPrerequisites.length === 0) {
+                container.innerHTML = '<p>No prerequisite courses assigned yet.</p>';
+                return;
+            }
+            
+            assignedPrerequisites.forEach(course => {
+                const item = document.createElement('div');
+                item.className = 'prerequisite-item';
+                item.innerHTML = `
+                    <div class="prerequisite-info">
+                        <span class="prerequisite-name">${course.name}</span>
+                        <span class="prerequisite-term">${course.term || 'Fall'}</span>
+                        <span class="prerequisite-required">${course.required ? 'Required' : 'Optional'}</span>
+                    </div>
+                    <button class="remove-prerequisite" onclick="removePrerequisite('${course.id}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+        }
+        
+        function updatePrerequisitesTable() {
+    const tbody = document.getElementById('prerequisitesTable').querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    if (assignedPrerequisites.length === 0) {
+        const row = tbody.insertRow();
+        const cell = row.insertCell();
+                cell.colSpan = 5;  // Updated to 5 to account for the new action column
+        cell.textContent = "No prerequisites assigned yet";
+        cell.style.textAlign = "center";
+        return;
+    }
+    
+    assignedPrerequisites.forEach((course, index) => {
+        const row = tbody.insertRow();
+                row.setAttribute('data-course-id', course.id);
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${course.name}</td>
+                    <td>${course.term || 'Fall'}</td>
+            <td>${course.required ? 'Required' : 'Not Required'}</td>
+                    <td style="text-align: center;">
+                        <button onclick="removePrerequisite('${course.id}')" style="border: none; background: none; color: #dc3545; cursor: pointer;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </td>
+        `;
+    });
+}
+        
+function addPrerequisite() {
+    const select = document.getElementById('prerequisiteCourseSelect');
+    const termSelect = document.getElementById('termSelect');
+    const courseId = parseInt(select.value);
+    const term = termSelect.value;
+    
+    if (!courseId) {
+        alert('Please select a course to add.');
+        return;
+    }
+    
+    if (!term) {
+        alert('Please select a term.');
+        return;
+    }
+    
+    if (assignedPrerequisites.length >= MAX_PREREQUISITES) {
+        alert(`You can only assign up to ${MAX_PREREQUISITES} prerequisite courses.`);
+        return;
+    }
+    
+    // Find the course in available prerequisites
+    const course = availablePrerequisites.find(c => c.id === courseId);
+    if (!course) {
+        alert('Selected course not found.');
+        return;
+    }
+    
+    // Add to assigned prerequisites with term
+            const newPrerequisite = {
+                id: courseId,
+                name: course.name,
+        term: term,
+        required: true
+            };
+            
+            assignedPrerequisites.push(newPrerequisite);
+            
+            // Update prerequisites table
+            const tbody = document.getElementById('prerequisitesTable').querySelector('tbody');
+            
+            // Clear the "no prerequisites" message if it exists
+            if (tbody.rows.length === 1 && tbody.rows[0].cells.length === 1) {
+                tbody.innerHTML = '';
+            }
+            
+            const row = tbody.insertRow();
+            row.setAttribute('data-course-id', courseId);
+            row.innerHTML = `
+                <td>${tbody.rows.length}</td>
+                <td>${course.name}</td>
+                <td>${term}</td>
+                <td>Required</td>
+            `;
+            
+            // Reset selects
+            select.value = '';
+            termSelect.value = '';
+            
+            // Remove the course from the available prerequisites dropdown
+            const option = select.querySelector(`option[value="${courseId}"]`);
+            if (option) {
+                option.remove();
+            }
+        }
+        
+        function removePrerequisite(courseId) {
+            courseId = parseInt(courseId);
+            
+            // Remove from assignedPrerequisites array
+            const removedPrereq = assignedPrerequisites.find(p => p.id === courseId);
+            assignedPrerequisites = assignedPrerequisites.filter(course => course.id !== courseId);
+            
+            // Remove from prerequisites table
+    const tbody = document.getElementById('prerequisitesTable').querySelector('tbody');
+            const row = tbody.querySelector(`tr[data-course-id="${courseId}"]`);
+            if (row) {
+                row.remove();
+            }
+            
+            // Update row numbers
+            Array.from(tbody.rows).forEach((row, index) => {
+                row.cells[0].textContent = index + 1;
+            });
+            
+            // Add empty state if no prerequisites left
+            if (tbody.rows.length === 0) {
+        const row = tbody.insertRow();
+        const cell = row.insertCell();
+        cell.colSpan = 4;
+        cell.textContent = "No prerequisites assigned yet";
+        cell.style.textAlign = "center";
+            }
+            
+            // Add the course back to the available prerequisites dropdown
+            if (removedPrereq) {
+    const select = document.getElementById('prerequisiteCourseSelect');
+                const option = document.createElement('option');
+                option.value = removedPrereq.id;
+                option.textContent = removedPrereq.name;
+                select.appendChild(option);
+            }
+        }
+        
+        async function savePrerequisites() {
+            try {
+                const prerequisites = [];
+                const rows = document.querySelectorAll('#prerequisitesTable tbody tr');
+                
+                // Skip the "no prerequisites" message row
+                rows.forEach(row => {
+                    if (row.cells.length === 1 && row.cells[0].colSpan === 4) {
+        return;
+    }
+    
+                    const courseId = parseInt(row.getAttribute('data-course-id'));
+                    if (!courseId) {
+                        console.error('Invalid course ID:', row.getAttribute('data-course-id'));
+        return;
+    }
+    
+                    const courseName = row.cells[1].textContent;
+                    const term = row.cells[2].textContent;
+                    const required = row.cells[3].textContent === 'Required';
+                    
+                    prerequisites.push({
+                        id: courseId,
+                        name: courseName,
+                        required: required,
+                        term: term
+                    });
+                });
+
+                if (prerequisites.length === 0) {
+                    alert('No prerequisites to save.');
+        return;
+    }
+    
+                console.log('Saving prerequisites:', prerequisites); // Debug log
+
+                // Show loading state
+                const saveButton = document.querySelector('button[onclick="savePrerequisites()"]');
+                const originalText = saveButton.textContent;
+                saveButton.textContent = 'Saving...';
+                saveButton.disabled = true;
+
+                try {
+                    const response = await fetch(`/save-prerequisites/${applicationId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ prerequisites })
+                    });
+
+                    console.log('Response status:', response.status); // Debug log
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    console.log('Response result:', result); // Debug log
+
+                    if (result.success) {
+                        // Refresh the prerequisites list
+                        await fetchAssignedPrerequisites(applicationId);
+                        alert('Prerequisites saved successfully');
+                    } else {
+                        throw new Error(result.error || 'Failed to save prerequisites');
+                    }
+                } finally {
+                    // Restore button state
+                    saveButton.textContent = originalText;
+                    saveButton.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error saving prerequisites:', error);
+                alert('Error saving prerequisites: ' + error.message);
+            }
+        }
+        
+        function printPrerequisites() {
+            if (assignedPrerequisites.length === 0) {
+                alert('No prerequisite courses have been assigned yet.');
+        return;
+    }
+    
+            // Open a new window with the prerequisite information
+            const printWindow = window.open('/prerequisite-print/' + applicationId, '_blank');
+            
+            if (!printWindow) {
+                alert('Please allow popups to print the prerequisite document.');
+            }
+        }
+        
+        function downloadPrerequisitesPDF() {
+    if (assignedPrerequisites.length === 0) {
+                alert('No prerequisite courses have been assigned yet.');
+        return;
+    }
+    
+            // Redirect to the PDF download endpoint
+            window.location.href = '/prerequisite-pdf/' + applicationId;
+        }
+
+        // Update the updatePrerequisiteRecommendation function
+        function updatePrerequisiteRecommendation(applicationId) {
+            fetch(`/get-prerequisite-status/${applicationId}`)
+                .then(res => res.json())
+                .then(data => {
+                    const statusElement = document.getElementById('prerequisiteRequired');
+                    const explanationElement = document.getElementById('prereqExplanation');
+                    const coursesElement = document.getElementById('recommendedCourses');
+
+                    // Clear previous content
+                    coursesElement.innerHTML = '<h4>Required Prerequisite Courses:</h4>';
+
+                    // Update status indicator
+                    statusElement.textContent = data.required ? 'YES' : 'NO';
+                    statusElement.className = `status ${data.required ? 'yes' : 'no'}`;
+
+                    // Update explanation
+                    explanationElement.textContent = data.explanation;
+
+                    // Display required courses if any
+                    if (data.required_courses && data.required_courses.length > 0) {
+                        data.required_courses.forEach(course => {
+                            const courseElement = document.createElement('div');
+                            courseElement.className = 'recommended-course';
+                            courseElement.textContent = course;
+                            coursesElement.appendChild(courseElement);
+                        });
+                    } else {
+                        // Add a "no prerequisites needed" message
+                        const noPrereqMsg = document.createElement('div');
+                        noPrereqMsg.className = 'no-prerequisites';
+                        noPrereqMsg.textContent = 'Student has met all prerequisite requirements.';
+                        coursesElement.appendChild(noPrereqMsg);
+                    }
+                })
+                .catch(err => {
+                    console.error("Error fetching prerequisite recommendation:", err);
+                    document.getElementById('prerequisiteRequired').textContent = 'Error';
+                    document.getElementById('prerequisiteRequired').className = 'status';
+                    document.getElementById('prereqExplanation').textContent = 'Unable to load prerequisite recommendation.';
+                });
+        }
+
+        function updateStudentInfo(data) {
+            document.getElementById('student-name').textContent = data.extracted_name || 'Not available';
+            document.getElementById('email').textContent = data.email || 'Not available';
+            document.getElementById('student-dob').textContent = data.date_of_birth || 'Not available';
+            document.getElementById('student-gender').textContent = data.gender || 'Not available';
+            document.getElementById('student-citizenship').textContent = data.citizenship || 'Not available';
+            document.getElementById('student-field').textContent = data.fieldOfStudy || 'Not available';
+            document.getElementById('student-format').textContent = data.programFormat || 'Not available';
+            document.getElementById('student-semester').textContent = data.startSemester || 'Not available';
+            document.getElementById('student-year').textContent = data.startYear || 'Not available';
+        }
+    </script>
+</body>
+</html>

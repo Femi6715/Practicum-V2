@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prerequisite Courses</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: white;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #004080;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #004080;
+            margin-bottom: 5px;
+        }
+        .header p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+        .student-info {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .student-info p {
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        .prerequisites {
+            margin-bottom: 30px;
+        }
+        .prerequisites h2 {
+            color: #004080;
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #004080;
+            color: white;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        .signature-section {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .signature-line {
+            width: 45%;
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            margin-top: 70px;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .controls button {
+            padding: 10px 20px;
+            background-color: #004080;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 5px;
+        }
+        .controls button:hover {
+            background-color: #003070;
+        }
+        
+        @media print {
+            .controls {
+                display: none;
+            }
+        }
+    </style>
+    <!-- Add jsPDF library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="controls">
+        <button onclick="window.print()">Print</button>
+        <button onclick="generatePDF()">Download as PDF</button>
+        <button onclick="window.close()">Close</button>
+    </div>
+    
+    <div class="header">
+        <h1>Bowie State University</h1>
+        <p>Graduate Applications Processing and Management System</p>
+        <p>Prerequisite Courses Assignment</p>
+    </div>
+    
+    <div class="student-info">
+        <p><strong>Student Name:</strong> <span id="studentName"></span></p>
+        <p><strong>Student ID:</strong> <span id="studentId"></span></p>
+        <p><strong>Application ID:</strong> <span id="applicationId"></span></p>
+        <p><strong>Date Issued:</strong> <span id="dateIssued"></span></p>
+    </div>
+    
+    <div class="prerequisites">
+        <h2>Assigned Prerequisite Courses</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Course Code</th>
+                    <th>Course Name</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="prerequisitesTableBody">
+                <!-- Prerequisite courses will be dynamically inserted here -->
+            </tbody>
+        </table>
+        
+        <p>The above prerequisite courses must be completed before proceeding with the graduate program.</p>
+    </div>
+    
+    <div class="signature-section">
+        <div class="signature-line">Student Signature</div>
+        <div class="signature-line">Program Coordinator</div>
+    </div>
+    
+    <div class="footer">
+        <p>This document was generated on <span id="generationDate"></span></p>
+        <p>Bowie State University - Graduate Applications Processing and Management System</p>
+    </div>
+    
+    <script>
+        // Fetch prerequisite data from the server
+        document.addEventListener('DOMContentLoaded', function() {
+            const applicationId = window.location.pathname.split('/').pop();
+            
+            // Set the current date
+            const currentDate = new Date().toLocaleDateString();
+            document.getElementById('dateIssued').textContent = currentDate;
+            document.getElementById('generationDate').textContent = currentDate;
+            document.getElementById('applicationId').textContent = applicationId;
+            
+            // Fetch student and prerequisite data
+            fetch(`/get-prerequisite-data/${applicationId}`)
+                .then(res => res.json())
+                .then(data => {
+                    // Set student information
+                    document.getElementById('studentName').textContent = data.studentName || 'N/A';
+                    document.getElementById('studentId').textContent = data.studentId || 'N/A';
+                    
+                    // Fill in prerequisites table
+                    const tbody = document.getElementById('prerequisitesTableBody');
+                    tbody.innerHTML = '';
+                    
+                    if (data.prerequisites.length === 0) {
+                        const row = tbody.insertRow();
+                        const cell = row.insertCell();
+                        cell.colSpan = 4;
+                        cell.textContent = "No prerequisites assigned";
+                        cell.style.textAlign = "center";
+                    } else {
+                        data.prerequisites.forEach((course, index) => {
+                            const row = tbody.insertRow();
+                            
+                            // Extract course code and name
+                            const parts = course.name.split(' ');
+                            const courseCode = parts.slice(0, 2).join(' ');
+                            const courseName = parts.slice(2).join(' ');
+                            
+                            row.innerHTML = `
+                                <td>${index + 1}</td>
+                                <td>${courseCode}</td>
+                                <td>${courseName}</td>
+                                <td>Required</td>
+                            `;
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error("Error fetching prerequisite data:", err);
+                    alert("Error loading prerequisite data. Please try again.");
+                });
+        });
+        
+        function generatePDF() {
+            const { jsPDF } = window.jspdf;
+            
+            // Hide controls for PDF generation
+            const controls = document.querySelector('.controls');
+            controls.style.display = 'none';
+            
+            // Create PDF
+            html2canvas(document.body).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+                const imgX = (pdfWidth - imgWidth * ratio) / 2;
+                const imgY = 0;
+                
+                pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+                pdf.save('prerequisite_courses.pdf');
+                
+                // Show controls again
+                controls.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>
