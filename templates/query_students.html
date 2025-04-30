@@ -447,6 +447,15 @@
           `;
           return;
       }
+      
+      // Sort students by application ID in descending order
+      students.sort((a, b) => {
+          // Extract numeric part from application ID (e.g., "student123" -> 123)
+          const idA = parseInt(a.application_id.replace(/\D/g, ''));
+          const idB = parseInt(b.application_id.replace(/\D/g, ''));
+          return idB - idA; // Descending order
+      });
+
       students.forEach(student => {
           const row = document.createElement("tr");
           row.innerHTML = `

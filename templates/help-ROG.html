@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f6f9;
+            color: #333;
+            animation: fadeInBody 0.6s ease-in-out;
+            display: flex;
+        }
+    
+        @keyframes fadeInBody {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 250px;
+            background-color: #004080;
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-item {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Responsive Sidebar */
+        .sidebar-toggle {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1001;
+            background-color: #004080;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                width: 250px;
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .main-content.sidebar-active {
+                margin-left: 250px;
+            }
+        }
+
+        header {
+            background-color: #004080;
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            animation: slideInTop 0.7s ease;
+        }
+    
+        @keyframes slideInTop {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    
+        main {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+            animation: zoomIn 0.7s ease;
+        }
+    
+        @keyframes zoomIn {
+            from { transform: scale(0.96); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    
+        h2 {
+            color: #004080;
+            font-size: 26px;
+            margin-bottom: 20px;
+        }
+
+        .faq-section {
+            margin-bottom: 40px;
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #004080;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            color: #004080;
+            margin-bottom: 10px;
+        }
+
+        .faq-answer {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .contact-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 8px;
+            border-left: 4px solid #004080;
+        }
+
+        .contact-info {
+            margin-top: 20px;
+        }
+
+        .contact-info p {
+            margin: 10px 0;
+            color: #666;
+        }
+
+        .contact-info strong {
+            color: #004080;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Student Portal</h2>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="/upload" class="nav-link">
+                    <i>📤</i> Upload Documents
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/review" class="nav-link">
+                    <i>📋</i> Review Applications
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/query-students" class="nav-link">
+                    <i>🔍</i> Query Students
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/manage-decisions" class="nav-link">
+                    <i>✅</i> Manage Decisions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/generate-reports" class="nav-link">
+                    <i>📊</i> Generate Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/help" class="nav-link">
+                    <i>❓</i> Help
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/signin" class="nav-link">
+                    <i>🚪</i> Sign Out
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <p>© 2023 Student Portal</p>
+        </div>
+    </div>
+    
+    <!-- Sidebar Toggle Button (visible on mobile) -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <span>☰</span>
+    </button>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+<header>
+            <h1>Help Center</h1>
+</header>
+<main>
+            <section class="faq-section">
+    <h2>Frequently Asked Questions</h2>
+                <div class="faq-item">
+                    <div class="faq-question">How do I upload student documents?</div>
+                    <div class="faq-answer">
+                        To upload student documents, navigate to the Upload Documents page and follow these steps:
+                        <ol>
+                            <li>Enter the student's Application ID</li>
+                            <li>Select the transcript file (PDF format)</li>
+                            <li>Select the application data file (PDF format)</li>
+                            <li>Click the Upload button</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">How do I review applications?</div>
+                    <div class="faq-answer">
+                        To review applications:
+                        <ol>
+                            <li>Go to the Review Applications page</li>
+                            <li>Select an application from the list</li>
+                            <li>Review the student's information and documents</li>
+                            <li>Make your decision and add any comments</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">How do I generate reports?</div>
+                    <div class="faq-answer">
+                        To generate reports:
+                        <ol>
+                            <li>Navigate to the Generate Reports page</li>
+                            <li>Select the type of report you need</li>
+                            <li>Choose the date range if applicable</li>
+                            <li>Click Generate Report</li>
+                            <li>Download the report in your preferred format</li>
+                        </ol>
+    </div>
+    </div>
+            </section>
+
+            <section class="contact-section">
+                <h2>Contact Support</h2>
+                <div class="contact-info">
+                    <p><strong>Email:</strong> support@studentportal.com</p>
+                    <p><strong>Phone:</strong> (555) 123-4567</p>
+                    <p><strong>Hours:</strong> Monday - Friday, 9:00 AM - 5:00 PM EST</p>
+                    <p><strong>Location:</strong> Room 123, Student Services Building</p>
+    </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Set active navigation link based on current page
+        function setActiveNavLink() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (currentPath.includes(link.getAttribute('href'))) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // Initialize sidebar toggle functionality
+        function initSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                mainContent.classList.toggle('sidebar-active');
+            });
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                const isClickInside = sidebar.contains(event.target) || 
+                                     sidebarToggle.contains(event.target);
+                
+                if (!isClickInside && window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('sidebar-active');
+                }
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('sidebar-active');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set active nav link
+            setActiveNavLink();
+            
+            // Initialize sidebar toggle
+            initSidebarToggle();
+        });
+    </script>
+</body>
+</html>

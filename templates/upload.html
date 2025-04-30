@@ -371,13 +371,13 @@
   
   <!-- Main Content -->
   <div class="main-content" id="mainContent">
-    <header>
+  <header>
       <h1>Upload Documents</h1>
       <p>Submit your transcript and application data for evaluation</p>
-    </header>
-    <div class="container">
+  </header>
+  <div class="container">
       <h1>Upload Documents</h1>
-      <form id="uploadForm">
+    <form id="uploadForm">
         <!-- <div class="form-group">
           <label for="applicationId">Application ID:</label>
           <input type="text" id="applicationId" name="application_id" placeholder="Enter Application ID" required>
@@ -385,7 +385,7 @@
 
         <div class="form-group">
           <div class="file-upload-group">
-            <label for="transcriptUpload">Select Transcript (Image or PDF):</label>
+      <label for="transcriptUpload">Select Transcript (Image or PDF):</label>
             <input type="file" id="transcriptUpload" name="transcript" accept=".png, .jpg, .jpeg, .pdf" required>
             <div class="file-info">Accepted formats: PNG, JPG, JPEG, PDF</div>
           </div>
@@ -400,16 +400,16 @@
         </div>
 
         <button type="button" onclick="processDocuments()">Process Documents</button>
-      </form>
+    </form>
 
-      <!-- Loader -->
-      <div id="loaderContainer" class="loader-container">
-        <div class="loader"></div>
+    <!-- Loader -->
+    <div id="loaderContainer" class="loader-container">
+      <div class="loader"></div>
         <div class="loader-text">Processing documents, please wait...</div>
-      </div>
+    </div>
 
-      <!-- Output -->
-      <div class="output" id="output">
+    <!-- Output -->
+    <div class="output" id="output">
         <h3>Processing Results</h3>
         
         <div class="results-section" id="errorSection" style="display: none;">
@@ -438,7 +438,7 @@
           <p><strong>Country:</strong> <span id="extractedCountry"></span></p>
           <p><strong>Degree Level:</strong> <span id="extractedDegreeLevel"></span></p>
           <p><strong>Courses Found:</strong> <span id="coursesFound"></span></p>
-          <p><strong>Prerequisite Required:</strong> <span id="prerequisiteResult"></span></p>
+      <p><strong>Prerequisite Required:</strong> <span id="prerequisiteResult"></span></p>
         </div>
 
         <div class="results-section" id="coursesSection" style="display: none;">
@@ -473,9 +473,9 @@
           <p><strong>Military Service:</strong> <span id="militaryServiceResult"></span></p>
           <p><strong>Citizenship Type:</strong> <span id="citizenTypeResult"></span></p>
         </div>
-      </div>
+    </div>
 
-      <a href="/signin">Back to Home</a>
+    <a href="/signin">Back to Home</a>
     </div>
   </div>
 

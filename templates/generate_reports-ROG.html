@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Generate Reports</title>
+  <style>
+    body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+            background-color: #f3f6f9;
+            color: #333;
+            animation: fadeInBody 1s ease-in-out;
+            display: flex;
+        }
+    
+        @keyframes fadeInBody {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 250px;
+      background-color: #004080;
+      color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .sidebar-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: white;
+        }
+        
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .nav-item {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            border-left: 4px solid #ffd700;
+        }
+        
+        .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-footer {
+      padding: 20px;
+      text-align: center;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Responsive Sidebar */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            background: #004080;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 1.2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .main-content.sidebar-active {
+                margin-left: 250px;
+            }
+            
+            .sidebar-toggle {
+                display: block;
+            }
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        header h1 {
+            margin: 0;
+            color: #004080;
+            font-size: 1.8rem;
+        }
+        
+        /* Report Section Styles */
+        .report-section {
+            background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in-out;
+    }
+        
+        .report-section h2 {
+      color: #004080;
+            margin-top: 0;
+      margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+        
+        .report-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .report-option {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #004080;
+            transition: all 0.3s ease;
+        }
+        
+        .report-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .report-option h3 {
+            color: #004080;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .report-option p {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .date-range {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .date-range input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        
+        .format-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .format-option {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .format-option:hover, .format-option.active {
+            background-color: #004080;
+            color: white;
+            border-color: #004080;
+        }
+        
+        .report-option button {
+      width: 100%;
+      padding: 10px;
+      background-color: #004080;
+      color: white;
+            border: none;
+            border-radius: 4px;
+      cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .report-option button:hover {
+            background-color: #003366;
+            transform: translateY(-1px);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Student Portal</h2>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="/upload" class="nav-link">
+                    <i>📤</i> Upload Documents
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/review" class="nav-link">
+                    <i>📋</i> Review Applications
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/query-students" class="nav-link">
+                    <i>🔍</i> Query Students
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/manage-decisions" class="nav-link">
+                    <i>✅</i> Manage Decisions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/generate-reports" class="nav-link">
+                    <i>📊</i> Generate Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/help" class="nav-link">
+                    <i>❓</i> Help
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/signin" class="nav-link">
+                    <i>🚪</i> Sign Out
+                </a>
+            </li>
+        </ul>
+        <div class="sidebar-footer">
+            <p>© 2023 Student Portal</p>
+        </div>
+    </div>
+    
+    <!-- Sidebar Toggle Button (visible on mobile) -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <span>☰</span>
+    </button>
+    
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+  <header>
+    <h1>Generate Reports</h1>
+  </header>
+  <main>
+            <section class="report-section">
+                <h2>Application Statistics</h2>
+                <div class="report-options">
+                    <div class="report-option">
+                        <h3>Application Status Report</h3>
+                        <p>View all processed transcripts with student details (ID, Name, Major, Citizenship)</p>
+                        <div class="date-range">
+                            <input type="date" id="statusStartDate">
+                            <input type="date" id="statusEndDate">
+                        </div>
+                        <div class="format-options">
+                            <div class="format-option active">PDF</div>
+                            <div class="format-option">Excel</div>
+                            <div class="format-option">CSV</div>
+                        </div>
+                        <button onclick="generateReport('status')">Generate Report</button>
+                    </div>
+
+                    <div class="report-option">
+                        <h3>Prerequisite Analysis</h3>
+                        <p>Generate separate reports for students who need prerequisites and those who don't</p>
+                        <div class="date-range">
+                            <input type="date" id="prereqStartDate">
+                            <input type="date" id="prereqEndDate">
+                        </div>
+                        <div class="format-options">
+                            <div class="format-option active">PDF</div>
+                            <div class="format-option">Excel</div>
+                            <div class="format-option">CSV</div>
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                            <button onclick="generateReport('prereq-needed')" style="flex: 1;">Students Needing Prerequisites</button>
+                            <button onclick="generateReport('prereq-not-needed')" style="flex: 1;">Students Not Needing Prerequisites</button>
+                        </div>
+                    </div>
+
+                    <div class="report-option">
+                        <h3>Demographic Report</h3>
+                        <p>View demographic information about applicants</p>
+                        <div class="date-range">
+                            <input type="date" id="demoStartDate">
+                            <input type="date" id="demoEndDate">
+                        </div>
+                        <div class="format-options">
+                            <div class="format-option active">PDF</div>
+                            <div class="format-option">Excel</div>
+                            <div class="format-option">CSV</div>
+                        </div>
+                        <button onclick="generateReport('demo')">Generate Report</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Set active navigation link based on current page
+        function setActiveNavLink() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => {
+                if (currentPath.includes(link.getAttribute('href'))) {
+                    link.classList.add('active');
+                }
+            });
+        }
+        
+        // Initialize sidebar toggle functionality
+        function initSidebarToggle() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('active');
+                mainContent.classList.toggle('sidebar-active');
+            });
+            
+            // Close sidebar when clicking outside on mobile
+            document.addEventListener('click', function(event) {
+                const isClickInside = sidebar.contains(event.target) || 
+                                     sidebarToggle.contains(event.target);
+                
+                if (!isClickInside && window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('sidebar-active');
+                }
+            });
+            
+            // Handle window resize
+            window.addEventListener('resize', function() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.remove('active');
+                    mainContent.classList.remove('sidebar-active');
+                }
+            });
+        }
+
+        // Handle format option selection
+        document.querySelectorAll('.format-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const formatOptions = this.parentElement.querySelectorAll('.format-option');
+                formatOptions.forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Generate report function
+        function generateReport(type) {
+            const formatOptions = document.querySelectorAll('.format-option.active');
+            const format = formatOptions[0].textContent.toLowerCase();
+            
+            // Get date range based on report type
+            const startDate = document.getElementById(`${type}StartDate`).value;
+            const endDate = document.getElementById(`${type}EndDate`).value;
+            
+            let reportType = type;
+            if (type === 'prereq-needed' || type === 'prereq-not-needed') {
+                reportType = 'prereq';
+            }
+            
+            // Show loading indicator
+            const button = event.target;
+            const originalText = button.textContent;
+            button.textContent = 'Generating...';
+            button.disabled = true;
+            
+            // Prepare the request data
+            const requestData = {
+                report_type: reportType,
+                format: format,
+                start_date: startDate,
+                end_date: endDate,
+                prerequisite_type: type === 'prereq-needed' ? 'needed' : 
+                                 type === 'prereq-not-needed' ? 'not_needed' : null
+            };
+            
+            // Make API call to generate report
+            fetch('/generate-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                // Create download link
+                const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+                a.style.display = 'none';
+      a.href = url;
+                
+                // Set filename based on report type and format
+                let filename = '';
+                if (type === 'status') {
+                    filename = `application_status_report_${new Date().toISOString().split('T')[0]}.${format}`;
+                } else if (type === 'prereq-needed') {
+                    filename = `prerequisite_needed_report_${new Date().toISOString().split('T')[0]}.${format}`;
+                } else if (type === 'prereq-not-needed') {
+                    filename = `prerequisite_not_needed_report_${new Date().toISOString().split('T')[0]}.${format}`;
+                }
+                
+                a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+                window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+                
+                // Reset button
+                button.textContent = originalText;
+                button.disabled = false;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error generating report. Please try again.');
+                
+                // Reset button
+                button.textContent = originalText;
+                button.disabled = false;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set active nav link
+            setActiveNavLink();
+            
+            // Initialize sidebar toggle
+            initSidebarToggle();
+        });
+  </script>
+</body>
+</html>

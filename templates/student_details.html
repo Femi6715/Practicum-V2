@@ -566,7 +566,7 @@
                 <h3>Demographic Information</h3>
                 <div class="demographic-grid">
                     <div class="demographic-item">
-                        <span class="label">Student Status:</span>
+                        <span class="label">Student Status: International</span>
                         <span id="citizenship">Loading...</span>
                     </div>
                     <div class="demographic-item">
@@ -696,8 +696,8 @@
         
         // Available prerequisite courses
         const availablePrerequisites = [
-            { id: 1, name: "INSS 500 Introduction to Information Systems" },
-            { id: 2, name: "INSS 505 Object Oriented Programming" },
+            { id: 1, name: "INSS 400 Introduction to Information Systems" },
+            { id: 2, name: "INSS 405 Object Oriented Programming" },
             { id: 3, name: "INSS 515 Principles & Practices of Information Systems" },
         ];
 
@@ -1070,7 +1070,7 @@
             <td>${index + 1}</td>
             <td>${course.name}</td>
                     <td>${course.term || 'Fall'}</td>
-            <td>${course.required ? 'Required' : 'Not Required'}</td>
+            <td>${course.required ? 'Required' : 'Required'}</td>
                     <td style="text-align: center;">
                         <button onclick="removePrerequisite('${course.id}')" style="border: none; background: none; color: #dc3545; cursor: pointer;">
                             <i class="fas fa-times"></i>

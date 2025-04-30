@@ -1261,8 +1261,8 @@ def save_prerequisites(application_id):
             
             # Find the course name from available prerequisites
             for available_prereq in [
-                {"id": 1, "name": "INSS 500 Introduction to Information Systems"},
-                {"id": 2, "name": "INSS 505 Object Oriented Programming"},
+                {"id": 1, "name": "INSS 400 Introduction to Information Systems"},
+                {"id": 2, "name": "INSS 405 Object Oriented Programming"},
                 {"id": 3, "name": "INSS 515 Principles & Practices of Information Systems"}
             ]:
                 if available_prereq["id"] == course_id:
