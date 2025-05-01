@@ -15,10 +15,11 @@ import json  # Needed for converting courses list to JSON
 from datetime import datetime
 import traceback
 from PIL import Image
-
+from auth import auth  # Import the auth blueprint
 
 app = Flask(__name__)
 CORS(app)
+app.register_blueprint(auth)  # Register the auth blueprint
 
 # Global DB connection (for routes that use it directly)
 db = mysql.connector.connect(
