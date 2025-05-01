@@ -16,6 +16,7 @@ from datetime import datetime
 import traceback
 from PIL import Image
 from auth import auth  # Import the auth blueprint
+from fpdf import FPDF
 
 app = Flask(__name__)
 CORS(app)
@@ -1265,9 +1266,10 @@ def save_prerequisites(application_id):
             
             # Find the course name from available prerequisites
             for available_prereq in [
-                {"id": 1, "name": "INSS 400 Introduction to Information Systems"},
-                {"id": 2, "name": "INSS 405 Object Oriented Programming"},
-                {"id": 3, "name": "INSS 515 Principles & Practices of Information Systems"}
+                {"id": 1, "name": "MGMT 241 - Principles of Management or equivalent"},
+                {"id": 2, "name": "ECON 351 - Business Statistics or equivalent"},
+                {"id": 3, "name": "INSS 400 - Introduction to Information Systems"},
+                {"id": 4, "name": "INSS 405 - Introduction to Object Oriented Programming"}
             ]:
                 if available_prereq["id"] == course_id:
                     prereq_name = available_prereq["name"]
@@ -1470,14 +1472,14 @@ def get_prerequisite_status(application_id):
         elif has_is and not has_programming:
             return jsonify({
                 "required": True,
-                "explanation": "IS prerequisite required - only IS courses found in transcript.",
-                "required_courses": ["BUIS 360 or INSS 400"]
+                "explanation": "Programming prerequisite required - only IS courses found in transcript.",
+                "required_courses": ["INSS 405"]
             }), 200
         else:  # has_programming and not has_is
             return jsonify({
                 "required": True,
-                "explanation": "Programming prerequisite required - only Programming courses found in transcript.",
-                "required_courses": ["BUIS 360 or INSS 400"]
+                "explanation": "IS prerequisite required - only Programming courses found in transcript.",
+                "required_courses": ["INSS 400"]
             }), 200
             
     except Exception as e:
@@ -2165,6 +2167,263 @@ def reprocess_empty_records_route():
         return jsonify({"message": "Successfully reprocessed empty records"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Study Plan Constants
+PREREQUISITE_COURSES = [
+    {"code": "MGMT 241", "name": "Principles of Management or equivalent", "credits": 3},
+    {"code": "ECON 351", "name": "Business Statistics or equivalent", "credits": 3},
+    {"code": "INSS 400", "name": "Introduction to Information Systems", "credits": 3},
+    {"code": "INSS 405", "name": "Introduction to Object Oriented Programming", "credits": 3}
+]
+
+CORE_COURSES = [
+    {"code": "INSS 515", "name": "Principles and Practices of Information Systems", "credits": 3},
+    {"code": "INSS 538", "name": "Data Communication Systems Networks", "credits": 3},
+    {"code": "INSS 540", "name": "Information Systems Analysis and Design", "credits": 3},
+    {"code": "INSS 550", "name": "Database Management and Decision Systems", "credits": 3},
+    {"code": "INSS 573", "name": "Digital Innovation & Entrepreneurship", "credits": 3},
+    {"code": "INSS 575", "name": "Information Systems Project Management", "credits": 3}
+]
+
+PRACTICUM_COURSES = [
+    {"code": "INSS 780", "name": "Information Systems Practicum I", "credits": 3},
+    {"code": "INSS 788", "name": "Information Systems Practicum II", "credits": 3}
+]
+
+RESEARCH_COURSES = [
+    {"code": "INSS 790", "name": "Master's Thesis in Information Systems and Sciences I", "credits": 3},
+    {"code": "INSS 798", "name": "Master's Thesis in Information Systems and Sciences II", "credits": 3}
+]
+
+TRACK_COURSES = {
+    "data_analytics": [
+        {"code": "INSS 662", "name": "Decision Support and Intelligent Decision System", "credits": 3},
+        {"code": "INSS 655", "name": "Data Warehousing and Mining", "credits": 3},
+        {"code": "INSS 686", "name": "Information Privacy and Security", "credits": 3},
+        {"code": "INSS 725", "name": "Issues in Information Systems Management", "credits": 3}
+    ],
+    "enterprise": [
+        {"code": "INSS 635", "name": "Information Systems Security", "credits": 3},
+        {"code": "INSS 640", "name": "Advanced Object-Oriented Analysis and Design", "credits": 3},
+        {"code": "INSS 676", "name": "Principles of Enterprise Architecture", "credits": 3},
+        {"code": "INSS 725", "name": "Issues in Information Systems Management", "credits": 3}
+    ],
+    "health": [
+        {"code": "INSS 658", "name": "Health Informatics", "credits": 3},
+        {"code": "PHIS 556", "name": "Public Health Informatics", "credits": 3},
+        {"code": "PHIS 656", "name": "Adv Public Health Informatics", "credits": 3},
+        {"code": "PHIS 660", "name": "Governance, Ethical, and Legal Aspects of Public Health Informatics", "credits": 3}
+    ]
+}
+
+def calculate_semester_credits(courses):
+    """Calculate total credits for a list of courses"""
+    return sum(course.get('credits', 3) for course in courses)
+
+def generate_study_plan(application_id, has_prerequisites=False, track="data_analytics", research_option=False):
+    """
+    Generate a study plan based on student prerequisites and track selection.
+    Ensures 9 credits per semester (except last, which is min 3, max 9), and proper sequencing of courses.
+    If prerequisites exist, spread the plan over 5 semesters, with Practicum/Research in the last two.
+    """
+    prerequisites = []
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT prerequisite_name, term, required 
+            FROM prerequisites 
+            WHERE application_id = %s
+            ORDER BY term, prerequisite_name
+        """, (application_id,))
+        db_prerequisites = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        for db_prereq in db_prerequisites:
+            matching_prereq = next(
+                (p for p in PREREQUISITE_COURSES if p['code'] in db_prereq['prerequisite_name']),
+                None
+            )
+            if matching_prereq:
+                prerequisites.append({
+                    'code': matching_prereq['code'],
+                    'name': matching_prereq['name'],
+                    'credits': matching_prereq['credits'],
+                    'required': db_prereq['required'],
+                    'term': db_prereq['term']
+                })
+    except Exception as e:
+        print(f"Error fetching prerequisites from database: {e}")
+
+    core_courses = CORE_COURSES.copy()
+    capstone_courses = RESEARCH_COURSES if research_option else PRACTICUM_COURSES
+    track_courses = TRACK_COURSES[track].copy()
+    electives = track_courses.copy()  # Use track courses as electives for now
+
+    if prerequisites:
+        # 5-semester plan with strict credit limits
+        study_plan = {f"semester_{i}": [] for i in range(1, 6)}
+        # 1. Semester 1: prerequisites + core to 9 credits
+        sem_credits = 0
+        core_index = 0
+        for prereq in prerequisites:
+            if sem_credits + prereq['credits'] <= 9:
+                study_plan["semester_1"].append(prereq)
+                sem_credits += prereq['credits']
+        # Fill with core courses to reach 9 credits
+        while sem_credits < 9 and core_index < len(core_courses):
+            course = core_courses[core_index]
+            if sem_credits + course['credits'] <= 9:
+                study_plan["semester_1"].append(course)
+                sem_credits += course['credits']
+            core_index += 1
+        # Remove used core courses
+        used_core_codes = [c['code'] for c in study_plan["semester_1"] if c in core_courses]
+        core_courses = [c for c in core_courses if c['code'] not in used_core_codes]
+        # 2. Gather all remaining courses (core, electives)
+        remaining_courses = core_courses + electives
+        # 3. Place Practicum/Research I in semester 4, II in semester 5
+        study_plan["semester_4"].append(capstone_courses[0])
+        study_plan["semester_5"].append(capstone_courses[1])
+        # 4. Fill semesters 2, 3, 4, 5 to 9 credits (except last, min 3, max 9)
+        sem_keys = ["semester_2", "semester_3", "semester_4", "semester_5"]
+        for sem in sem_keys:
+            sem_credits = calculate_semester_credits(study_plan[sem])
+            while sem != "semester_5" and sem_credits < 9 and remaining_courses:
+                next_course = remaining_courses.pop(0)
+                if sem_credits + next_course['credits'] <= 9:
+                    study_plan[sem].append(next_course)
+                    sem_credits += next_course['credits']
+                else:
+                    break
+            # For last semester, allow min 3, max 9
+            if sem == "semester_5":
+                while sem_credits < 3 and remaining_courses:
+                    next_course = remaining_courses.pop(0)
+                    study_plan[sem].append(next_course)
+                    sem_credits += next_course['credits']
+                # Don't exceed 9 credits
+                while sem_credits < 9 and remaining_courses:
+                    next_course = remaining_courses[0]
+                    if sem_credits + next_course['credits'] > 9:
+                        break
+                    study_plan[sem].append(remaining_courses.pop(0))
+                    sem_credits += next_course['credits']
+    else:
+        # 4-semester plan (original logic)
+        study_plan = {
+            "year_1": {"fall": CORE_COURSES[0:3], "spring": CORE_COURSES[3:6]},
+            "year_2": {
+                "fall": [
+                    (RESEARCH_COURSES if research_option else PRACTICUM_COURSES)[0],
+                    TRACK_COURSES[track][0],
+                    TRACK_COURSES[track][1]
+                ],
+                "spring": [
+                    (RESEARCH_COURSES if research_option else PRACTICUM_COURSES)[1],
+                    TRACK_COURSES[track][2],
+                    TRACK_COURSES[track][3]
+                ]
+            }
+        }
+    return study_plan
+
+@app.route('/generate-study-plan/<application_id>', methods=['POST'])
+def create_study_plan(application_id):
+    try:
+        data = request.get_json()
+        track = data.get('track', 'data_analytics')
+        research_option = data.get('research_option', False)
+        
+        # Get prerequisites directly from database
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT COUNT(*) as count 
+            FROM prerequisites 
+            WHERE application_id = %s
+        """, (application_id,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        
+        has_prerequisites = result['count'] > 0
+        
+        study_plan = generate_study_plan(
+            application_id,
+            has_prerequisites=has_prerequisites,
+            track=track,
+            research_option=research_option
+        )
+        
+        return jsonify({
+            'success': True,
+            'study_plan': study_plan
+        })
+        
+    except Exception as e:
+        print(f"Error generating study plan: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@app.route('/download-study-plan/<application_id>', methods=['GET'])
+def download_study_plan(application_id):
+    # Fetch student name
+    db_conn = get_db_connection()
+    cur = db_conn.cursor(dictionary=True)
+    cur.execute("""
+        SELECT COALESCE(td.extracted_name, 'Unknown Student') as extracted_name
+        FROM application_records ar
+        LEFT JOIN transcript_data td ON ar.application_id = td.application_id
+        WHERE ar.application_id = %s
+    """, (application_id,))
+    student = cur.fetchone()
+    student_name = student['extracted_name'] if student else 'Unknown Student'
+    cur.close()
+    db_conn.close()
+
+    # Generate study plan (simulate POST with default options)
+    plan = generate_study_plan(application_id)
+
+    # Create PDF
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(0, 10, f"Study Plan for {student_name}", ln=True, align='C')
+    pdf.ln(10)
+    pdf.set_font("Arial", '', 12)
+
+    if 'semester_1' in plan:
+        for i in range(1, 6):
+            sem_key = f"semester_{i}"
+            pdf.set_font("Arial", 'B', 13)
+            pdf.cell(0, 10, f"Semester {i}", ln=True)
+            pdf.set_font("Arial", '', 12)
+            for course in plan[sem_key]:
+                pdf.cell(0, 8, f"{course['code']} - {course['name']}", ln=True)
+            pdf.ln(3)
+    elif 'year_1' in plan and 'year_2' in plan:
+        for year in [1, 2]:
+            pdf.set_font("Arial", 'B', 13)
+            pdf.cell(0, 10, f"Year {year}", ln=True)
+            for sem in ['fall', 'spring']:
+                pdf.set_font("Arial", 'B', 12)
+                pdf.cell(0, 8, f"{sem.capitalize()} Semester", ln=True)
+                pdf.set_font("Arial", '', 12)
+                for course in plan[f'year_{year}'][sem]:
+                    pdf.cell(0, 8, f"{course['code']} - {course['name']}", ln=True)
+                pdf.ln(2)
+            pdf.ln(3)
+    else:
+        pdf.cell(0, 10, "No study plan available.", ln=True)
+
+    pdf_output = f"study_plan_{application_id}.pdf"
+    pdf.output(pdf_output)
+    
+    from flask import send_file
+    return send_file(pdf_output, as_attachment=True)
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
