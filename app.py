@@ -21,20 +21,20 @@ CORS(app)
 
 # Global DB connection (for routes that use it directly)
 db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="62221085",       
-    database="mis_gapms"       
+    host="sql.freedb.tech",
+    user="freedb_MISGAP",
+    password="p9uhbUe7hD*&NE?",       
+    database="freedb_MISGAP"       
 )
 cursor = db.cursor()
 
 # Helper function to get a fresh DB connection
 def get_db_connection():
     return mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="62221085",
-        database="mis_gapms"
+         host="sql.freedb.tech",
+        user="freedb_MISGAP",
+        password="p9uhbUe7hD*&NE?",       
+        database="freedb_MISGAP" 
     )
 
 # Set Upload Folder and allowed file types
