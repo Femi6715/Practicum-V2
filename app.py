@@ -17,6 +17,12 @@ import traceback
 from PIL import Image
 from auth import auth  # Import the auth blueprint
 from fpdf import FPDF
+import csv
+from io import StringIO
+import openpyxl
+from openpyxl.utils import get_column_letter
+from tempfile import NamedTemporaryFile
+from io import BytesIO
 
 app = Flask(__name__)
 CORS(app)
@@ -2424,6 +2430,172 @@ def download_study_plan(application_id):
     
     from flask import send_file
     return send_file(pdf_output, as_attachment=True)
+
+@app.route('/generate-prerequisite-report', methods=['GET'])
+def generate_prerequisite_report():
+    db_conn = get_db_connection()
+    cur = db_conn.cursor(dictionary=True)
+    # Query students who need prerequisites and their assigned prerequisites
+    cur.execute('''
+        SELECT
+            td.application_id,
+            COALESCE(td.extracted_name, 'Unknown Student') as extracted_name,
+            COALESCE(td.extracted_major, 'Unknown') as extracted_major,
+            td.prerequisite_required,
+            p.prerequisite_name
+        FROM transcript_data td
+        LEFT JOIN prerequisites p ON td.application_id = p.application_id
+        WHERE td.prerequisite_required = TRUE
+        ORDER BY td.application_id, p.prerequisite_name
+    ''')
+    rows = cur.fetchall()
+    cur.close()
+    db_conn.close()
+
+    # Organize data by student
+    students = {}
+    for row in rows:
+        app_id = row['application_id']
+        if app_id not in students:
+            students[app_id] = {
+                'name': row['extracted_name'],
+                'major': row['extracted_major'],
+                'prerequisites': []
+            }
+        if row['prerequisite_name']:
+            students[app_id]['prerequisites'].append(row['prerequisite_name'])
+
+    # Generate CSV
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Application ID', 'Student Name', 'Major', 'Assigned Prerequisites'])
+    for app_id, info in students.items():
+        prereqs = '; '.join(info['prerequisites']) if info['prerequisites'] else 'None Assigned'
+        writer.writerow([app_id, info['name'], info['major'], prereqs])
+    output.seek(0)
+
+    from flask import Response
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={"Content-Disposition": "attachment;filename=prerequisite_report.csv"}
+    )
+
+@app.route('/generate-report', methods=['POST'])
+def generate_report():
+    data = request.get_json()
+    report_type = data.get('report_type')
+    format = data.get('format', 'pdf').lower()
+
+    if report_type == 'status':
+        # Application Status Report: fetch only from transcript_data
+        db_conn = get_db_connection()
+        cur = db_conn.cursor(dictionary=True)
+        cur.execute('''
+            SELECT
+                application_id,
+                COALESCE(extracted_name, 'Unknown Student') as extracted_name,
+                COALESCE(extracted_major, 'Unknown') as extracted_major,
+                COALESCE(extracted_country, 'Unknown') as extracted_country,
+                COALESCE(extracted_degree_level, 'Unknown') as extracted_degree_level,
+                prerequisite_required
+            FROM transcript_data
+            ORDER BY application_id
+        ''')
+        rows = cur.fetchall()
+        cur.close()
+        db_conn.close()
+
+        if format == 'pdf':
+            from fpdf import FPDF
+            from io import BytesIO
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("Arial", 'B', 16)
+            pdf.cell(0, 10, "Application Status Report", ln=True, align='C')
+            pdf.ln(10)
+            pdf.set_font("Arial", 'B', 12)
+            pdf.cell(35, 8, "App ID", 1)
+            pdf.cell(45, 8, "Name", 1)
+            pdf.cell(35, 8, "Major", 1)
+            pdf.cell(30, 8, "Country", 1)
+            pdf.cell(30, 8, "Degree", 1)
+            pdf.cell(20, 8, "Prereq?", 1)
+            pdf.ln()
+            pdf.set_font("Arial", '', 12)
+            for row in rows:
+                pdf.cell(35, 8, str(row['application_id']), 1)
+                pdf.cell(45, 8, row['extracted_name'], 1)
+                pdf.cell(35, 8, row['extracted_major'], 1)
+                pdf.cell(30, 8, row['extracted_country'], 1)
+                pdf.cell(30, 8, row['extracted_degree_level'], 1)
+                pdf.cell(20, 8, 'Yes' if row['prerequisite_required'] else 'No', 1)
+                pdf.ln()
+            pdf_bytes = BytesIO()
+            pdf_bytes.write(pdf.output(dest='S').encode('latin1'))
+            pdf_bytes.seek(0)
+            from flask import send_file
+            return send_file(pdf_bytes, as_attachment=True, download_name="application_status_report.pdf", mimetype='application/pdf')
+        elif format == 'excel':
+            import openpyxl
+            from openpyxl.utils import get_column_letter
+            from tempfile import NamedTemporaryFile
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            ws.title = "Status Report"
+            headers = ['Application ID', 'Student Name', 'Major', 'Country', 'Degree Level', 'Prerequisite Required']
+            ws.append(headers)
+            for row in rows:
+                ws.append([
+                    row['application_id'],
+                    row['extracted_name'],
+                    row['extracted_major'],
+                    row['extracted_country'],
+                    row['extracted_degree_level'],
+                    'Yes' if row['prerequisite_required'] else 'No'
+                ])
+            # Auto-size columns
+            for col in ws.columns:
+                max_length = 0
+                col_letter = get_column_letter(col[0].column)
+                for cell in col:
+                    try:
+                        if len(str(cell.value)) > max_length:
+                            max_length = len(str(cell.value))
+                    except:
+                        pass
+                ws.column_dimensions[col_letter].width = max_length + 2
+            tmp = NamedTemporaryFile(delete=False, suffix='.xlsx')
+            wb.save(tmp.name)
+            tmp.seek(0)
+            from flask import send_file
+            return send_file(tmp.name, as_attachment=True, download_name="application_status_report.xlsx")
+        elif format == 'csv':
+            import csv
+            from io import StringIO
+            output = StringIO()
+            writer = csv.writer(output)
+            writer.writerow(['Application ID', 'Student Name', 'Major', 'Country', 'Degree Level', 'Prerequisite Required'])
+            for row in rows:
+                writer.writerow([
+                    row['application_id'],
+                    row['extracted_name'],
+                    row['extracted_major'],
+                    row['extracted_country'],
+                    row['extracted_degree_level'],
+                    'Yes' if row['prerequisite_required'] else 'No'
+                ])
+            output.seek(0)
+            from flask import Response
+            return Response(
+                output.getvalue(),
+                mimetype='text/csv',
+                headers={"Content-Disposition": "attachment;filename=application_status_report.csv"}
+            )
+        else:
+            return {"error": "Only PDF, Excel, and CSV formats are supported."}, 400
+    else:
+        return {"error": "Unsupported report type"}, 400
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)

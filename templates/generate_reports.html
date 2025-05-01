@@ -284,11 +284,6 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="/manage-decisions" class="nav-link">
-                    <i>✅</i> Manage Decisions
-                </a>
-            </li>
-            <li class="nav-item">
                 <a href="/generate-reports" class="nav-link">
                     <i>📊</i> Generate Reports
                 </a>
@@ -350,9 +345,13 @@
                             <div class="format-option">Excel</div>
                             <div class="format-option">CSV</div>
                         </div>
-                        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <button onclick="generateReport('prereq-needed')" style="flex: 1;">Students Needing Prerequisites</button>
-                            <button onclick="generateReport('prereq-not-needed')" style="flex: 1;">Students Not Needing Prerequisites</button>
+                        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+                            <select id="prereqReportType" style="padding: 8px; border-radius: 4px; border: 1px solid #ccc; font-size: 0.95rem;">
+                                <option value="prereq-needed">Students Needing Prerequisites</option>
+                                <option value="prereq-not-needed">Students Not Needing Prerequisites</option>
+                                <option value="prereq-assigned">Students Needing Prerequisites (with Assigned Prerequisites)</option>
+                            </select>
+                            <button onclick="generatePrereqReport()" style="background-color: #004080; color: white;">Generate Prerequisite Report</button>
                         </div>
                     </div>
 
@@ -433,9 +432,11 @@
             const formatOptions = document.querySelectorAll('.format-option.active');
             const format = formatOptions[0].textContent.toLowerCase();
             
-            // Get date range based on report type
-            const startDate = document.getElementById(`${type}StartDate`).value;
-            const endDate = document.getElementById(`${type}EndDate`).value;
+            // Get date range based on report type, with null checks
+            const startDateElem = document.getElementById(`${type}StartDate`);
+            const endDateElem = document.getElementById(`${type}EndDate`);
+            const startDate = startDateElem ? startDateElem.value : '';
+            const endDate = endDateElem ? endDateElem.value : '';
             
             let reportType = type;
             if (type === 'prereq-needed' || type === 'prereq-not-needed') {
@@ -507,6 +508,20 @@
                 button.textContent = originalText;
                 button.disabled = false;
             });
+        }
+
+        function downloadPrerequisiteReport() {
+            // Directly download the CSV from the new endpoint
+            window.open('/generate-prerequisite-report', '_blank');
+        }
+
+        function generatePrereqReport() {
+            const selected = document.getElementById('prereqReportType').value;
+            if (selected === 'prereq-assigned') {
+                downloadPrerequisiteReport();
+            } else {
+                generateReport(selected);
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
