@@ -350,7 +350,7 @@
                 const username = this.querySelector('input[name="username"]').value;
                 const password = this.querySelector('input[name="password"]').value;
                 
-                // Send signin request to new endpoint
+                // Send signin request to correct endpoint
                 fetch('/signin/basic', {
                     method: 'POST',
                     headers: {
@@ -395,7 +395,7 @@
                     return;
                 }
                 
-                // Send registration request to new endpoint
+                // Send registration request to correct endpoint
                 fetch('/register/basic', {
                     method: 'POST',
                     headers: {
