@@ -16,6 +16,7 @@ from datetime import datetime
 import traceback
 from PIL import Image
 
+
 app = Flask(__name__)
 CORS(app)
 
