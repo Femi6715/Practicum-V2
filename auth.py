@@ -8,10 +8,10 @@ auth = Blueprint('auth', __name__)
 # Database connection function
 def get_db_connection():
     return mysql.connector.connect(
-        host='localhost',
-        user='root',
-        password='62221085',
-        database='mis_gapms'
+        host='9hej2.h.filess.io',
+        user='MISGAPMS_unknownwar',
+        password='0fec82a33055d994e14f8717b63e1b56d74a149d',
+        database='MISGAPMS_unknownwar'
     )
 
 # Email validation function
