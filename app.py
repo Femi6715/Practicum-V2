@@ -29,24 +29,6 @@ CORS(app)
 app.register_blueprint(auth)  # Register the auth blueprint
 
 # Global DB connection (for routes that use it directly)
-db = mysql.connector.connect(
-        host='9hej2.h.filess.io',
-        port=3307,
-        user='MISGAPMS_unknownwar',
-        password='0fec82a33055d994e14f8717b63e1b56d74a149d',
-        database='MISGAPMS_unknownwar'      
-)
-cursor = db.cursor()
-
-# Helper function to get a fresh DB connection
-def get_db_connection():
-    return mysql.connector.connect(
-        host='9hej2.h.filess.io',
-        port=3307,
-        user='MISGAPMS_unknownwar',
-        password='0fec82a33055d994e14f8717b63e1b56d74a149d',
-        database='MISGAPMS_unknownwar'
-    )
 
 # Set Upload Folder and allowed file types
 UPLOAD_FOLDER = "uploads"
